@@ -1,0 +1,41 @@
+{
+  "taken_at": "2026-10-24T09:43:06-04:00",
+  "event": "Problem 9 start, right after POST /api/reset",
+  "cash_accounts": [
+    {
+      "name": "checking",
+      "balance": 3400.0,
+      "date": "2026-08-31"
+    }
+  ],
+  "payments_rows": 0,
+  "invoices": [
+    {
+      "id": 501,
+      "amount": 840.0,
+      "due_date": "2026-08-28",
+      "status": "open"
+    }
+  ],
+  "leases": [
+    {
+      "id": 1,
+      "monthly_rent": 2400.0,
+      "next_due": "2026-09-02"
+    }
+  ],
+  "tickets": [
+    {
+      "id": 101,
+      "status": "open"
+    },
+    {
+      "id": 102,
+      "status": "open"
+    },
+    {
+      "id": 103,
+      "status": "open"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+# Secrets: never commit real keys
+.env
+*.env
+!.env.example
+!frontend/.env.example
+
+# Python / Node build artifacts
+__pycache__/
+*.pyc
+node_modules/
+frontend/dist/
+
+# One-time 2FA codes are secrets for the moment they exist
+output/2fa/
+
+# Scratch / OS files
+*.tmp
+.DS_Store
+
+# Local GitHub Desktop clone of this same repo (not part of the submission)
+HW 5 AI for Managers/

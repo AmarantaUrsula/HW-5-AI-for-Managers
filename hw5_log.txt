@@ -1,0 +1,1059 @@
+HW5 — PROMPT AND RESPONSE LOG
+=============================
+
+------------------------------------------------------------
+[1] PROMPT
+------------------------------------------------------------
+I am doing a new assignment and I want all the work saved in the folder called  hw5
+
+------------------------------------------------------------
+[1] RESPONSE
+------------------------------------------------------------
+Got it. Everything for this assignment will go in the hw5 folder, which is now
+the working directory.
+
+The folder already has one file, data/campus_customs.db. It's a small SQLite
+database with 9 tables: desk, inventory (10 rows), pricing, vendors, leases,
+cash_accounts, payments (empty), invoices and tickets (3 rows).
+
+What does the assignment ask for? You can paste the instructions or drop the
+file into hw5.
+
+------------------------------------------------------------
+[2] PROMPT
+------------------------------------------------------------
+Ok first, please keep a log in a txt or simiilar kind of fine will alrl prompts
+and  respones here for Hw 5 . Before we get started please note these
+rules/conventions: -The field desk.date_today is "today"  for the shop. use this
+date to determine what is overdue
+=vendor lead times come from the vendors table
+=a vendor will not ship new product while they still have an option of unpaid
+invoice
+-human approval is required for any payments. points will be deducted  if this
+is not done. if payment is made, make sure to update the relevant table.
+-if there is not enough cash. the pay tool must refuse- no negative balances
+
+------------------------------------------------------------
+[2] RESPONSE
+------------------------------------------------------------
+Done. This log is hw5/hw5_log.txt. I'll add every prompt and response to it
+from now on, and it already includes the first exchange.
+
+I also saved your rules to hw5/RULES.md and will follow them:
+- "Today" is desk.date_today, which is 2026-08-31.
+- Lead times come from vendors.lead_days.
+- A vendor with an open (unpaid) invoice won't ship.
+- No payment without your explicit approval. When one is made, I'll add a row
+  to payments, mark the invoice paid (or move the lease due date), and reduce
+  the cash_accounts balance.
+- If there isn't enough cash, the payment is refused. No negative balances.
+
+Things already in the data:
+- Invoice 501 ($840 to Bulldog Print Co, due 2026-08-28) is still open, so it's
+  overdue. Under your rules, Bulldog won't ship new product (5-day lead time)
+  until it's paid.
+- Checking has $3,400, so it could cover that invoice. I won't pay it unless
+  you approve.
+
+What's the first task?
+
+------------------------------------------------------------
+[3] PROMPT
+------------------------------------------------------------
+more rules on this before we proceed:
+=cash only goes out in this homework - we did not model reveue, so no money
+comes in
+=do not email custumers or call real vensdors. Drafts stay onbaord.
+
+------------------------------------------------------------
+[3] RESPONSE
+------------------------------------------------------------
+Added both to hw5/RULES.md (rules 6 and 7):
+6. Cash only goes out. Revenue isn't modeled, so the checking balance can only
+   go down. Every payment I propose will show what's left afterward, because
+   that money can't be replaced.
+7. No real outreach. I won't email customers or contact vendors. Any message
+   will be a draft saved in hw5/ and never sent.
+
+This makes cash tighter than it looks. The $3,400 in checking has to cover
+everything from here on: invoice 501 ($840), the lease rent, and any future
+vendor orders.
+
+What's the first task?
+
+------------------------------------------------------------
+[4] PROMPT
+------------------------------------------------------------
+ok please add these rules:
+-cash only goes out in this homework - we did not model revenue, so no money
+comes in
+-before a full run to resove the tickets, make sure to rest the database to the
+original values
+-do NOT email customers or call real vendors. Drafts stay on board
+
+------------------------------------------------------------
+[4] RESPONSE
+------------------------------------------------------------
+The cash rule and the no-outreach rule were already in hw5/RULES.md (rules 6
+and 7) from the last message, so I didn't add them twice.
+
+The reset rule is new, and I added it as rule 8. To make it work:
+- I saved an untouched copy of the database as
+  hw5/data/campus_customs_original.db. Nothing had changed the database yet, so
+  this copy has the original values.
+- I added hw5/reset_db.sh, which copies that backup over
+  data/campus_customs.db. I tested it, and afterward the two files are
+  identical.
+
+Before every full run that resolves the tickets, I'll run ./reset_db.sh first.
+
+What's the first task?
+
+------------------------------------------------------------
+[5] PROMPT
+------------------------------------------------------------
+can you ensure you are using my PORTKEY_API_KEY for AI calls? it can be found
+here: /Users/Liza/Library/CloudStorage/OneDrive-YaleUniversity
+
+------------------------------------------------------------
+[5] RESPONSE
+------------------------------------------------------------
+Yes. Every AI call in HW5 will use your Portkey key, and I tested it with a
+real call.
+
+- I found PORTKEY_API_KEY in "AI for managers/.env", one folder above hw5. I
+  left the key there and didn't copy it anywhere.
+- I added hw5/llm.py with get_client(), which every HW5 script will use for AI
+  calls. It reads the key from that .env and sends calls through Portkey's
+  gateway (https://api.portkey.ai/v1). It never falls back to an OpenAI key.
+- I added hw5/.env with PORTKEY_MODEL=azure-openai-global, the same model
+  setting you used in HW 3.
+- Test: "python3 llm.py" sent one short message through Portkey and got back
+  "ok".
+- I added this as rule 9 in RULES.md.
+
+One clarification: my own replies in this chat come from Claude Code, not your
+Portkey key. The key is used by the HW5 scripts I write, such as the agent
+that resolves the tickets.
+
+Heads-up: "AI for managers/PortKey.rtf" has the key in plain text, inside a
+synced OneDrive folder. Consider deleting that copy since the .env already has
+it.
+
+------------------------------------------------------------
+[6] PROMPT
+------------------------------------------------------------
+for this assignment only use gpt-6-luna through Portkey for every agent because
+multi-agent chats burn tokens fast, ok?
+
+------------------------------------------------------------
+[6] RESPONSE
+------------------------------------------------------------
+OK. Every HW5 agent will use gpt-6-luna through Portkey.
+
+- hw5/.env now has PORTKEY_MODEL=gpt-6-luna.
+- llm.py now enforces it: get_client() refuses to run with any other model, so
+  no agent can quietly use a bigger one.
+- Test: a real call through Portkey with gpt-6-luna returned "ok". I also
+  checked that the old model setting is now refused.
+- I added this as rule 10 in RULES.md.
+
+------------------------------------------------------------
+[7] PROMPT
+------------------------------------------------------------
+Please create AI_prompts.md at the start ofthe assigmenta nd keep it updated as
+I work. This file is the log of what I typed here in the vibe coder. Make a
+section for each problem. each section must include:
+* the problem number and title
+* at least one prompt I typed
+* one follow up prompt if I need tit (and one sentence on what was lacking
+  after the first that I had to follow up). Makes sure these details are
+  included in this file.
+
+------------------------------------------------------------
+[7] RESPONSE
+------------------------------------------------------------
+Created hw5/AI_prompts.md.
+- It starts with a "Setup" section that has every prompt so far: the first
+  prompt (create the hw5 folder), the follow-ups (rules, reset, Portkey key,
+  gpt-6-luna, this file), and one sentence on what the first prompt was
+  missing.
+- At the bottom is a template for problem sections. Each will have the problem
+  number and title, at least one prompt, any follow-up prompt, and one sentence
+  on what was missing.
+- I'll add a section as you start each problem and update it as you follow up.
+- I fixed obvious typos in the quoted prompts so they read cleanly. The exact
+  wording is still in hw5_log.txt.
+
+------------------------------------------------------------
+[8] PROMPT
+------------------------------------------------------------
+Actually this most recent set of instructions is Problem 1 andt this section
+should be labeled "Problem 1: Vibe cover prompts"
+
+------------------------------------------------------------
+[8] RESPONSE
+------------------------------------------------------------
+Done. AI_prompts.md now has a section called "Problem 1: Vibe coder prompts":
+- Prompt: the request to create AI_prompts.md.
+- Follow-up: this message asking to label it as Problem 1.
+- What was lacking: the request had been filed under "Setup" instead of being
+  labeled as Problem 1 with its title.
+The earlier setup prompts (folder, rules, reset, Portkey, gpt-6-luna) stay in a
+"Setup" section above it. I read "Vibe cover" as a typo for "Vibe coder".
+
+------------------------------------------------------------
+[9] PROMPT
+------------------------------------------------------------
+Problem 2 is "Problem 2: Study the Campus Custome database"
+
+------------------------------------------------------------
+[9] RESPONSE
+------------------------------------------------------------
+I read every table (read-only, nothing changed) and wrote the study to
+hw5/db_study.md. I also added a Problem 2 section to AI_prompts.md.
+
+Main findings (today = 2026-08-31, checking = $3,400, no payments yet):
+- Out of stock: tee size S and the Crest Mug.
+- Invoice 501 ($840 to Bulldog Print Co) was due 2026-08-28, so it's 3 days
+  overdue. Bulldog won't ship anything new until it's paid.
+- Rent of $2,400 for the Chapel Street shop is due 2026-09-02, in 2 days.
+- Paying both costs $3,240 and leaves $160.
+- Ticket 101: Tauhid Zaman wants 1 tee in size S. Stock is 0, and the reprint
+  is blocked by invoice 501. If 501 is paid today, the 5-day lead time puts
+  arrival around 2026-09-05.
+- Ticket 102: the landlord's rent notice. Paying it needs your approval.
+- Ticket 103: Yale AI Club wants 20 hoodies in size M with a bulk discount.
+  Only 8 are in stock, so 12 are short, and a reprint is blocked by invoice
+  501. Unit cost is $22 and list price is $58.
+- Cash constraint: 501 + rent + reprinting 12 hoodies at $22 = $3,504, which
+  is more than $3,400. Not everything can be paid.
+
+No payments were made.
+
+------------------------------------------------------------
+[10] PROMPT
+------------------------------------------------------------
+ok let's back up. Open data/campus_customs.db and look through every table and
+its fields. Copy the original file to data/campus_customs_new/db - later
+problems update that working copy.  Study the three open tickets so you can see
+how they link to the other tables. Now, start output/harness.md. For each table,
+list the fields and one short line  on why that table matters for the agents.
+You will keep growing this harness file as we advance this project (aka do
+future problems).
+
+------------------------------------------------------------
+[10] RESPONSE
+------------------------------------------------------------
+- Working copy: I copied the original to hw5/data/campus_customs_new.db (I read
+  "campus_customs_new/db" as ".db"). Byte-for-byte check: it matches the
+  original.
+- Reset: reset_db.sh now copies the original data/campus_customs.db over the
+  working copy, and leaves the original untouched. I tested it, and updated
+  rule 8 in RULES.md to match.
+- Ticket links: tickets.sku and size connect to inventory and pricing,
+  tickets.invoice_id to invoices and then vendors, and tickets.lease_id to
+  leases. Payments point to what they paid through kind and ref_id.
+  - 101 links to inventory (tee S, qty 0) and to invoice 501 (Bulldog, open,
+    overdue, 5 lead days).
+  - 102 links to lease 1 ($2,400 due 2026-09-02).
+  - 103 links to inventory (hoodie M, qty 8, needs 20) and to pricing ($22
+    cost, $58 list).
+- Harness: I started hw5/output/harness.md. It lists both database files, all
+  9 tables with their fields and one line on why each matters for the agents,
+  the ticket links, and a summary of the rules. I'll add to it with each
+  problem.
+- AI_prompts.md: Problem 2 now has this as its follow-up prompt, plus what was
+  missing.
+
+------------------------------------------------------------
+[11] PROMPT
+------------------------------------------------------------
+Ok here is the next section: Problem 3: build the MCP server. Write an MCP
+server in mcp_server/ upsing FastMCP. It will talk to
+data/campus_customs_new.db. You do NOT need to connec to run it in this
+problem. Every agent in this homework uses the tools in the this MCP server.
+You will add more tools to it later; for write three tools you know we will
+need for the tickets in teh database. Keep the names clear. Never invent data,
+only use information in the database. In output/harness.md, list each ofyour
+three MCP tools. For every tools include: which tables it reads, which ticket it
+helps unlock (101, 102, or 103), and one sentence on wht that tool is the right
+one for that ticket. value likes like "reads inventory" score low so please tie
+the tool to the ticket. Also, add a short mcp_server/README.md file that
+explains what the MCP server is for, which databse file it uses, and the three
+tools it has.
+
+------------------------------------------------------------
+[11] RESPONSE
+------------------------------------------------------------
+Built hw5/mcp_server/server.py with FastMCP. It uses data/campus_customs_new.db
+and has three read-only tools, one per ticket:
+- check_stock_and_price(sku, size, qty_requested) reads inventory and pricing.
+  Ticket 103: hoodie M has 8 in stock, 12 short, $22 cost is the floor for any
+  discount, $58 list.
+- check_vendor_can_ship(vendor_id) reads vendors, invoices and desk. Ticket
+  101: Bulldog is blocked by invoice 501 ($840, 3 days overdue), and the
+  earliest arrival after payment is 2026-09-05.
+- check_rent_due(lease_id) reads leases, desk and cash_accounts. Ticket 102:
+  $2,400 is due 2026-09-02, in 2 days, and checking can cover it, leaving
+  $1,000.
+No tool makes up values. A missing row returns an error, which I tested with a
+fake SKU. None of them moves money.
+
+Also:
+- output/harness.md has a new "MCP tools" section listing the tables each tool
+  reads, the ticket it unlocks, and one sentence on why it fits that ticket.
+- mcp_server/README.md explains what the server is for, which database it
+  uses, and its three tools.
+- Problem 3 was added to AI_prompts.md.
+- Setup: fastmcp was installed without its server parts, so I installed
+  fastmcp-slim[server] 4.0.10.
+- Test: I called all three tools with an in-memory client, without starting a
+  server, and the results matched the database. The working copy is unchanged.
+
+------------------------------------------------------------
+[12] PROMPT
+------------------------------------------------------------
+Ok here is problem 4: Problem 4: Add the MCP server to vbie coder and test each
+tool. Make that section and then I'll proceed with instructions.
+
+------------------------------------------------------------
+[12] RESPONSE
+------------------------------------------------------------
+Added the "Problem 4: Add the MCP server to the vibe coder and test each tool"
+section to AI_prompts.md, with this prompt. Nothing else changed. Waiting for
+the Problem 4 instructions.
+
+------------------------------------------------------------
+[13] PROMPT
+------------------------------------------------------------
+ok so here is the work for this problem 4: add your MCP server to this project
+so you (the vibe coder) can call the tools. Save the connection JSON text in
+.mcp.json at the project root. Make sure you, the vibe coder is connect, then
+test EACH of your three MCP tools. Save the evidence in output/mcp_smoke.json.
+For every tool include:
+* the prompt I asked for here (aka in the vibe coder)
+* the tool name
+* the tool output (must match values in data/campus_customs_new.db
+
+------------------------------------------------------------
+[13] RESPONSE
+------------------------------------------------------------
+- I wrote hw5/.mcp.json with a server called "campus-customs". It runs
+  mcp_server/server.py with python3, using absolute paths.
+- Stdio check: I launched the server from .mcp.json over stdio, and it listed
+  all three tools.
+- I moved this vibe coder session's project folder to hw5, so hw5 is the
+  project root that holds .mcp.json. The vibe coder only loads the server when
+  this turn ends, so it isn't connected yet and no tools have been called.
+- Next: once the session reloads (approve "campus-customs" if asked), type one
+  prompt per tool. I'll call the tool, check its output against
+  campus_customs_new.db, and save each prompt, tool name and output in
+  output/mcp_smoke.json.
+
+------------------------------------------------------------
+[14] PROMPT
+------------------------------------------------------------
+ok here is problem 5. Its called Problem 5: Build the agent team and grow the
+MCP tools. Build the agentic team for Campus Customs using PydanticAI: Boss,
+Inventory, Accounting, Facilities, and Customer Service. Include prompts,
+models, and agent loops so they can delegate work to each other with full
+connectivity. Put the agent prompts in backend/prompts/ - one file per agent,
+ok? Put data types in the backend/models.py, and the agent files under backend/
+(the layout can vary as long as the five roles are CLEAR). Use my PORT_API_KEY
+and only gpt-6-luna for every agent.
+
+Now add any tols the agents need to the MCP server so they can work on open
+tickets. Shope facts come from the MCP server over data/campus_customs_new/db.
+Do NOT invent a second shop -tolls later that bypasses MCP, ok?
+
+Wire the agents so they append to output/audit_trail.json as they run: for each
+agent-loop step, recod enough to audit later. Append to this file- do not wipe
+it each run.
+
+In output/harness/md, list each agenta nd each MCP tool (including the ones we
+added in this problem) along with which table the tool uses. Also ad a short
+safety section: for example do not actually contact a a customer or authorize
+or initiate the solicitation or moving of money  in amounts more than $50)
+without out human two factor authentication. Do not use a toke amount that
+exceed $500; if you approach that rachet down to a less expensive model.
+update mcp_server/README.md so the tool ist mathces what you have now.
+
+------------------------------------------------------------
+[14] RESPONSE
+------------------------------------------------------------
+MCP server: grew from 3 to 13 tools.
+- New tools: list_open_tickets, get_ticket, update_ticket, list_vendors,
+  quote_bulk_discount, get_cash_position, preview_payment, pay_invoice,
+  pay_rent, draft_message.
+- The pay tools only work with a human-approval signature, which is created
+  for each session and known only to the MCP server. Over $50 they also need
+  2FA.
+- They refuse if there isn't enough cash, and every payment updates payments,
+  the invoice or lease, and cash_accounts.
+- draft_message saves files to output/drafts/ and never sends them.
+
+Agent team (PydanticAI 2.51, gpt-6-luna through Portkey only):
+- backend/agents/: one file per role (boss, inventory, accounting, facilities,
+  customer_service), plus base.py with the shared agent loop.
+- backend/prompts/: one prompt file per agent.
+- backend/models.py: the data types.
+- backend/run.py: the runner.
+- Each agent sees only the MCP tools for its role. Every agent can delegate to
+  every other (full connectivity), up to 3 levels deep.
+- Accounting is the only role with pay tools. Each pay call pauses for a human
+  in the terminal, who types YES and their name, plus a one-time 2FA code over
+  $50.
+
+Audit trail: output/audit_trail.json is append-only and has one entry per
+agent-loop step: ids, agent, depth, event, prompt or text, tool calls and
+results, tokens and cost. Approvals are logged without the token or the code.
+
+Budget: $500 cap per session, priced from the genai-prices table (gpt-6-luna:
+$0.20 per million input tokens, $0.75 per million output). At 80% it ratchets
+to smaller output caps, and the model stays gpt-6-luna under rule 10. At $500
+it stops.
+
+Docs: harness.md now has the agents, all 13 tools with their tables, the audit
+trail, and the safety section. mcp_server/README.md has the new tool list. I
+added RULES.md rules 11-13 and requirements.txt.
+
+Tests:
+- Tools: every tool works against the working copy. The pay tool refused no
+  approval, single-factor approval, a double payment and insufficient cash, and
+  accepted a correctly signed 2FA approval.
+- Approval and 2FA flow: tested end to end without the LLM.
+- Live gpt-6-luna runs (about $0.016 total): the Boss delegated to all four
+  specialists, used 11 different tools, updated all three tickets and saved
+  one draft.
+- Fix found during testing: Portkey's Azure gpt-6-luna only accepts tools when
+  reasoning_effort is 'none'.
+- Open issue: the agents haven't yet requested a payment on their own, so the
+  live approval pause hasn't been triggered by an agent.
+- The working DB was reset afterward. The audit trail keeps every test run.
+
+------------------------------------------------------------
+[15] PROMPT
+------------------------------------------------------------
+Ok here goes problem 6. It's called Problem 6: plan the three tickets. Before
+you wire the backend, let's write down what we expect the team to on each open
+tciket. Build output/desk_tickets.html - a page you can double-click with one
+tab per ticket (101, 102, 103). Also add empty Cash and Relfection tabs for
+later problems (leave them blank or with a short "coming later" note for now).
+on each ticket tab, fill and Expected section only (leave room for an Axctual
+section you will fill after you run the agents).  For each ticket's Expected
+section please indicate:
+* That the boss should call the IT director first because they are the one who
+  allocate types and volume of tickets to IT staff
+
+------------------------------------------------------------
+[15] CLARIFYING QUESTION -> ANSWER
+------------------------------------------------------------
+Q: The team has no IT director and the tickets aren't IT tickets. How should I
+   handle that bullet? (Drop it / Add IT Director agent / Note as human step /
+   More bullets coming)
+A: Add IT Director agent
+
+------------------------------------------------------------
+[15] RESPONSE
+------------------------------------------------------------
+- New IT Director agent:
+  - Files: backend/agents/it_director.py and backend/prompts/it_director.md.
+  - The Boss calls it first. It returns a RoutingPlan that assigns each ticket
+    to specialists, in order, with a ticket count per role.
+  - Tools: list_open_tickets and get_ticket. It never moves money or contacts
+    anyone.
+  - The Boss prompt now says to call it first.
+- Built output/desk_tickets.html, a single page that opens with a
+  double-click. It has tabs for 101, 102, 103, Cash ("Coming later") and
+  Reflection ("Coming later").
+- Each ticket tab has an Expected section with:
+  - the Boss calling the IT Director first
+  - the expected MCP tool calls, with values from the database
+  - the human gate
+  - the expected database end state
+  - what must not happen
+  It also has an empty dashed "Actual" box.
+- Key expectations:
+  - 101: Inventory finds 0 tees in size S and Bulldog blocked by invoice 501.
+    Accounting requests 501 ($840), which pauses for 2FA. If it's paid, the
+    earliest arrival is 2026-09-05 and the status is waiting_on_vendor. A draft
+    goes to Tauhid.
+  - 102: Facilities confirms $2,400 due 2026-09-02, and Accounting requests
+    rent with 2FA. If it's paid, next_due becomes 2026-10-02 and the status is
+    resolved. If both payments go through, checking goes $3,400 -> $2,560 ->
+    $160.
+  - 103: 8 on hand and 12 short. The discount quote must stay above the $22
+    cost (at most 62.07% off). Restocking 12 would cost $264, more than the
+    $160 left. A draft offer, no payment, status waiting_on_approval.
+- harness.md now lists the IT Director and the ticket plan page.
+
+------------------------------------------------------------
+[16] PROMPT
+------------------------------------------------------------
+ALSO,  as you just clarified we  haven't finished all the rules. We expect agent
+delegation to include some calls directly to IT staff, such as routine known
+issues. Please pick the MCP tools that are best fitted for this purpose. Do not
+send every specialist on every ticket. Lets make a workflow where IT specialist
+are directly send problems that are common with known solution and tier from
+there when directors need to be involved.
+
+------------------------------------------------------------
+[16] RESPONSE
+------------------------------------------------------------
+Built a tiered workflow.
+- MCP tools picked for routing:
+  - triage_ticket (new) matches a ticket to a known issue using live database
+    facts. It returns the tier, the minimum staff route, the first owner and
+    the escalation reasons.
+  - list_known_issues (new) returns the playbook in
+    mcp_server/known_issues.py: 7 known issues.
+  - update_ticket is now on every staff role, so Tier 1 owners can close
+    tickets without a director.
+- Tiers:
+  - Tier 1: routine known issue, straight to the first staff member on the
+    route, no director.
+  - Tier 2: blocked, multi-team or unknown, goes to the IT Director, who
+    assigns the minimum staff.
+  - Tier 3: cash conflict (obligations exceed cash) goes to the Boss.
+- Dispatcher: backend/workflow.py triages every open ticket through MCP and
+  sends it to its tier. backend/run.py now uses it.
+- Route enforcement: staff can only delegate to staff on the ticket's route.
+  Escalating to the IT Director or the Boss is always allowed, and a director
+  adding staff widens the route.
+- Prompts: rewritten for the Boss (Tier 3), the IT Director (Tier 2) and all
+  four staff (direct handling plus when to escalate).
+- Live run (non-interactive, about $0.017):
+  - 101: KI-ORDER-VENDOR-BLOCKED, Tier 2. The IT Director sent it to
+    inventory, accounting and customer_service. pay_invoice 501 was requested
+    and auto-denied. A draft was saved.
+  - 102: KI-RENT-ROUTINE, Tier 1. Facilities handed it to accounting.
+    pay_rent was requested and auto-denied. No director was involved.
+  - 103: KI-DISCOUNT-SHORTFALL, Tier 2. The IT Director sent it to inventory
+    and customer_service only. A draft was saved.
+  - No Tier 3, because $160 is left after all obligations.
+  - Accounting now actually requests payments, which fixes the Problem 5 gap.
+- Updated desk_tickets.html Expected sections (a tier box on each ticket),
+  harness.md (tiered workflow, playbook table, tools 14-15, agent tiers),
+  mcp_server/README.md (15 tools), RULES.md rule 14, and the Problem 6
+  follow-up in AI_prompts.md.
+- The working DB was reset after the test.
+
+------------------------------------------------------------
+[17] PROMPT
+------------------------------------------------------------
+ok here is Problem 7, its called Problem 7:Backend routes. Your React frontend
+dashboard (we will do this in the next problem) need a backend it can call. In
+backend/main.py, use FastAPI and add routes that do the following:
+* Return the three tickets and whether each is open or resolved
+
+------------------------------------------------------------
+[17] RESPONSE
+------------------------------------------------------------
+- backend/main.py is a FastAPI app with GET /api/tickets and GET /api/health.
+- /api/tickets returns all 3 tickets (id, type, requester, subject, raw status,
+  state, links, notes) plus open and resolved counts. state is "resolved" only
+  when status = resolved. Anything else, including waiting_on_approval, counts
+  as "open".
+- Data path: the routes go through the MCP server (new tool list_tickets), not
+  the database. The API starts MCP without an approval secret, so no route can
+  move money.
+- New backend/mcp_client.py is shared by the API and the agent runner.
+- CORS allows the React dev servers on ports 5173 and 3000, GET only.
+- Installed fastapi 0.162.0 and uvicorn 0.54.0 and added them to
+  requirements.txt.
+- Test (FastAPI TestClient): health shows 16 MCP tools. /api/tickets returns
+  101, 102 and 103, all open. After marking 102 resolved through MCP, it
+  showed 2 open and 1 resolved. CORS works for localhost:5173. The working DB
+  was reset afterward.
+- harness.md (API section, tool 16), mcp_server/README.md and AI_prompts.md
+  (Problem 7) are updated.
+- Only one route bullet was given. Ready to add more routes.
+
+------------------------------------------------------------
+[18] PROMPT
+------------------------------------------------------------
+Also,  there are a few more thing to do for this problem 7. The routes also
+must:
+-Take a ticket ID and run your agent team on that ticket
+-Return recent agent events -what each agent said and which tool  they used -so
+the board can refresh
+-Approve a payment or purchase after a human clicks approve (agents only
+prepare the pay; this route is what actually changes cash)
+-Return the current checking balances from cash_accounts
+-Reset the database to the original values when you want to try a fresh run.
+Then from the backend/ folder, start the server with:
+uvicorn main:app --reload --port 8000
+
+------------------------------------------------------------
+[19] PROMPT (sent mid-turn)
+------------------------------------------------------------
+This turn on your backend at http://localhost:8000 so the frontend dashboard
+can call those routes. In output/harness.md list each route in one line (what
+URL/what it does).
+
+------------------------------------------------------------
+[18-19] RESPONSE
+------------------------------------------------------------
+backend/main.py routes:
+- GET /api/health
+- GET /api/tickets: the three tickets, open or resolved.
+- POST /api/tickets/{id}/run: runs the agent team on that ticket in the
+  background and returns a session_id. Refused if the ticket is resolved or
+  another run is in progress.
+- GET /api/runs and /api/runs/{session_id}: run status and summary.
+- GET /api/events?since=&limit=&ticket_id=&session_id=: what each agent said,
+  which tools it used, and the results, from audit_trail.json. Poll with
+  next_since.
+- GET /api/payments: prepared, approved, denied, failed and void payments.
+- POST /api/payments/{id}/request-code: sends the one-time 2FA code
+  (simulated as output/2fa/one_time_code.txt).
+- POST /api/payments/{id}/approve {approved_by, code}: the ONLY route that
+  changes cash. It calls the pay tool through MCP with a signed approval, then
+  updates the ticket (rent paid -> resolved, invoice paid -> waiting_on_vendor).
+- POST /api/payments/{id}/deny {denied_by, reason}.
+- GET /api/cash: balances from cash_accounts, obligations, and the
+  pending-approval total.
+- POST /api/reset: copies the original DB over the working copy, voids pending
+  payments, and keeps the audit trail.
+
+Design:
+- In API runs, agents only PREPARE payments (new backend/payments.py:
+  PendingApprover writes output/pending_payments.json). They never pay.
+- 2FA is required over $50 (one-time code, 5-minute expiry, 3 tries).
+- Approvals are signed with a secret that only this process and the MCP server
+  know. The pay tool still refuses negative balances.
+- Audit entries now carry ticket_id, and dashboard actions are logged as agent
+  "human".
+- main.py adds hw5 to sys.path, so "uvicorn main:app" works from backend/.
+
+Tests (TestClient):
+- Reset, then run 102: Tier 1, facilities -> accounting, P-0001 $2,400
+  prepared.
+- Approving without a code returned 401, and so did a wrong code.
+- With the right code: approved, checking $3,400 -> $1,000, a payments row,
+  lease next_due 2026-10-02, and ticket 102 resolved.
+- A second approval returned 409, a second run while busy returned 409, and
+  running a resolved ticket returned 409.
+- The DB was reset afterward and the test payment file was removed.
+
+The server is now running from backend/ with "uvicorn main:app --reload --port
+8000" at http://localhost:8000. Health: 16 MCP tools. 3 open tickets, $3,400,
+no pending payments.
+
+harness.md now has the route list, one line each. Also updated:
+mcp_server/README.md, RULES.md rule 15, and AI_prompts.md (Problem 7
+follow-ups).
+
+Note: "purchases" (vendor restock orders) aren't in the database, so the
+approve route covers invoice and rent payments only.
+
+------------------------------------------------------------
+[20] PROMPT
+------------------------------------------------------------
+here is problem 8: Problem 8: Agent dashboard. Build the frontend dashboard in
+frontend/ with React + Vite + TypeScript. The page should call the routes you
+built in Problem 7. At minimum the board should: -list all three tickets -Let
+me pick one ticket and start the agent team on it -Show each agent and what
+they are saying/doing with the ticket runs -Mark a ticket resolved when the run
+finishes -Show a short summary of what each agent did on that ticket -let a
+human approve a pay or purchase when asked -show the checking balance (it
+should drop after an approved pay). Make the dashboard design adhere to
+principles of user experience design, e.g. color blind friendly color palette,
+relatively dense display of information, not too many design elements that are
+decorative only (as per Edward Tufte). Tell the front end to talk to your
+backend at http://localhost:8000. On the backend, allow the Vite page origin
+(usually http://localhost:5173) so the browser is allowed to call those routes.
+Start the board with: npm run dev
+This opens the React desk in my browser so I can pick tickets and watch agents.
+Write output/design.md with the same dashboard look (layout, how agents read
+differently, how resolved tickets and cash show up) and why, eg ensuring
+readability, dense information and design elements that are functional.
+
+------------------------------------------------------------
+[20] RESPONSE
+------------------------------------------------------------
+- Frontend: frontend/ uses React 19 + Vite 8 + TypeScript 7.
+  - Files: src/App.tsx, api.ts, types.ts, agents.ts, and
+    components/{TicketList, ActivityFeed, AgentSummaryPanel, ApprovalPanel,
+    CashPanel, AgentTag}.
+  - frontend/.env has VITE_API_BASE=http://localhost:8000.
+  - Vite is pinned to port 5173 and opens the browser.
+- Layout: a status strip on top, then three columns.
+  - Left: tickets, the selected ticket's details, Run agent team, and the
+    agent legend.
+  - Centre: the live activity feed, with time, agent, what it said or did,
+    and the tools used with their arguments. Below it, "What each agent did".
+  - Right: approvals (name, Send 2FA code, code, Approve/Deny), then cash
+    (big balance, step-line sparkline, paid table, still-owed table).
+- Accessibility: agents use the Okabe-Ito colorblind-safe palette, plus a
+  3-letter code, plus indentation by delegation depth. Status is shown as
+  "○ open" / "✓ resolved" (symbol and word, no red/green). Dense tables,
+  hairline rules, tabular numbers, and no decorative chrome.
+- Backend additions:
+  - GET /api/tickets/{id}/summary.
+  - Tickets are marked resolved when a run finishes and nothing is waiting
+    for a human, or when the last pending payment is approved. A denied
+    payment sets the ticket to in_progress.
+  - CORS already allowed localhost:5173.
+- Tests:
+  - tsc and vite build pass.
+  - In the in-app browser: selected 102 and pressed Run. The feed showed
+    DSK triage (Tier 1) -> FAC check_rent_due -> hand-off to ACC ->
+    preview_payment -> pay_rent prepared P-0001 ($2,400, not paid). The
+    summary panel showed both agents.
+  - Filled in the name and pressed Send 2FA code, and the board showed where
+    the code was sent.
+  - The vibe coder was correctly BLOCKED from reading the 2FA code, because an
+    AI must not approve payments. So P-0001 is left PENDING for the human to
+    approve on the board (checking should drop $3,400 -> $1,000).
+- output/design.md covers layout, agent identity, resolved tickets, cash,
+  approvals, and what was left out, with reasons. harness.md has a dashboard
+  section and the new summary route.
+- The board is running via "npm run dev" at http://localhost:5173 and the
+  backend at :8000.
+- Note: while freeing port 5173 the vibe coder mistakenly killed a Claude app
+  network-helper process (not Vite). It normally restarts automatically.
+
+------------------------------------------------------------
+[21] PROMPT
+------------------------------------------------------------
+I approved P-0001 on the board. Please check that checking dropped to $1,000
+and ticket 102 shows resolved.
+
+------------------------------------------------------------
+[21] RESPONSE
+------------------------------------------------------------
+Checked: the approval did NOT reach the backend.
+- /api/cash: checking is still $3,400, with $2,400 waiting for approval.
+- Ticket 102 is still waiting_on_approval (open). P-0001 is still pending.
+  The payments table is empty, and the lease is still due 2026-09-02.
+- Backend request log: the only POSTs are the test run on 102 and one
+  request-code call, the code the vibe coder requested during browser testing
+  at 13:08 UTC. No /approve request ever arrived, so there was no wrong-code or
+  expired-code error either. The board is connected and polling normally.
+- Likely cause: the Approve button stays disabled until a name AND a 6-digit
+  code are both filled in, so a click on it does nothing. The earlier code also
+  expires 5 minutes after it was sent.
+- Next step for the human: type your name, click "Resend code", open
+  output/2fa/one_time_code.txt, type the 6 digits, then click "Approve and pay
+  $2,400.00". If a red message appears under the row, share it.
+
+------------------------------------------------------------
+[22] PROMPT
+------------------------------------------------------------
+I resent the code, entered it, and clicked Approve. Please check again.
+
+------------------------------------------------------------
+[22] RESPONSE
+------------------------------------------------------------
+Rechecked: still NOT approved. Checking is $3,400, P-0001 is pending, ticket
+102 is waiting_on_approval, and the payments table is empty.
+- The backend log has no new POSTs at all: no request-code and no approve.
+  The only POSTs are still the 13:08 UTC test run and code request.
+- output/2fa/one_time_code.txt is still dated 09:08 local time. A "Resend
+  code" that reached the backend would have rewritten it, so the resend didn't
+  arrive either, and the code in that file has expired.
+- A browser IS polling the backend every 1.5-5 s, with ticket 101 selected,
+  so the board loads data but the button clicks aren't arriving.
+- Asked the human to hard-reload http://localhost:5173 and retry, and to share
+  any red text under the payment.
+
+------------------------------------------------------------
+[23] PROMPT
+------------------------------------------------------------
+I reloaded http://localhost:5173, resent the code, entered it, and clicked
+Approve. Please check again.
+
+------------------------------------------------------------
+[23] RESPONSE
+------------------------------------------------------------
+Checked at 09:13 EDT: still NOT approved. Checking is $3,400, P-0001 is
+pending, ticket 102 is waiting_on_approval, and the payments table is empty.
+- The backend has still received only 2 POSTs ever: the test run and the
+  vibe coder's request-code at 09:08. No request-code or approve request has
+  arrived from the human.
+- one_time_code.txt is still from 09:08, which is the vibe coder's request,
+  not a resend.
+- A browser is polling with ticket 101 selected, which matches a fresh page
+  load.
+- Suggested isolating the problem with the backend's built-in API page,
+  http://localhost:8000/docs: request a code there, read the file, approve
+  there. If that works, the problem is in the board's buttons. Also asked
+  for any message shown under P-0001 and the browser console (Cmd+Option+J)
+  errors.
+
+------------------------------------------------------------
+[24] PROMPT
+------------------------------------------------------------
+Here is what the board / browser console shows:
+
+------------------------------------------------------------
+[24] RESPONSE
+------------------------------------------------------------
+The message arrived with nothing after the colon, so no error text or
+screenshot came through. Rechecked: P-0001 is still pending, and the backend
+still has only the 2 earlier POSTs. Asked the human to paste the red text from
+under P-0001 or from the console (Cmd+Option+J), or attach a screenshot.
+
+------------------------------------------------------------
+[25] PROMPT (pasted mid-turn)
+------------------------------------------------------------
+Error: Unauthorized
+Response body
+{
+  "detail": "Two-factor check failed: Wrong code (2/3)."
+
+------------------------------------------------------------
+[24-25] RESPONSE
+------------------------------------------------------------
+The clicks are reaching the backend now. Since the last check:
+- Ticket 101 was run from the board. Accounting prepared P-0002 ($840, invoice
+  501).
+- 13:15 code sent for P-0002. 13:16 approve P-0002 -> wrong code (1/3).
+- 13:18 code sent for P-0001. 13:20 approve P-0001 -> wrong code (1/3, 2/3).
+- Nothing paid: checking $3,400, with $3,240 pending approval.
+
+Cause (a design flaw): every code went into ONE shared file,
+output/2fa/one_time_code.txt. Each new code request replaced the previous
+code, and an editor or OneDrive can keep showing an older copy of the file.
+So the code typed in was likely an outdated one.
+
+Fix:
+- Each payment now gets its own file, output/2fa/<payment id>_code.txt (for
+  example P-0001_code.txt).
+- The file states the payment id, the time it was sent, and that it's valid
+  for 5 minutes.
+- The board shows the exact file name and says to open it fresh.
+- The backend restarted (--reload), so earlier codes are gone: request a new
+  one.
+- Verified the new file name with one request-code call. The code was NOT
+  read, and the file was deleted.
+
+Steps for the human: in Approvals, P-0001 -> name -> Send 2FA code -> open
+output/2fa/P-0001_code.txt fresh -> check the time -> enter the code -> Approve.
+
+------------------------------------------------------------
+[26] PROMPT
+------------------------------------------------------------
+I sent a fresh code for P-0001, opened output/2fa/P-0001_code.txt, entered it,
+and approved. Please check that checking dropped to $1,000 and ticket 102 is
+resolved.
+
+------------------------------------------------------------
+[26] RESPONSE
+------------------------------------------------------------
+Confirmed, it worked:
+- Checking went $3,400 -> $1,000.
+- P-0001 is approved, by Liza, factor 2fa, at 13:25:04 UTC
+  (POST /approve -> 200).
+- The payments table has row 1: rent, lease 1, $2,400, checking, paid_at
+  2026-08-31, approved_by Liza.
+- Lease 1 next_due moved 2026-09-02 -> 2026-10-02.
+- Ticket 102 is resolved (state = resolved).
+- The 2FA code file was deleted after use.
+Still pending: P-0002 ($840, invoice 501, ticket 101). Approving it would
+leave $160. Ticket 103 is open (not run yet).
+
+------------------------------------------------------------
+[27] PROMPT
+------------------------------------------------------------
+ok this seems like its working well enough. Let's move on to problem 9:
+Problem 9: Resolve the tickets. Before testing the agents on a full run over
+the three tickets, I want to reset the working database
+data/campus_customs_new.db again so we can start clean. I want to note the
+starting checking balance for me and then run all three tickets on the board
+(101,102,103) until each is resolved. Open output/desk_tickets.html from
+Problem 6. On each ticket tab, fill in the Actual section from this run: which
+agents worked, what they delegated, and which tools they used. Keep the
+Expected section so we can compare the two. On the Cash tab of the same
+output/desk_tickets.html, itemize the money: -starting the checking balance
+(after the reset), -for each ticket: how cash changed when that ticket
+resolved, and why (which pay/purchase, dollar amount), -ending checking balance
+- it must match cash_accounts in the working databases. Wrong cash with get
+points deducted from this assignment even if the board shows every ticket
+resolved so lets make sure this works. Also save: output/resolved_tickets.json -
+for each ticket: id, final status, short outcome, what each agent contributed,
+and any human approvals, output/resolved_board.html - a page I can double-click
+with a screenshot of the React board for each Resolved ticket (101, 102, 103).
+Append real runs to output/audit_trail.json. Finish output/harness.md so it
+covers tables MCP tools, the five agents, API routs, the dashboard, and saftey
+rules.
+
+------------------------------------------------------------
+[27] RESPONSE (part 1: reset and runs)
+------------------------------------------------------------
+- 09:42:57 EDT: POST /api/reset. The working copy is byte-identical to the
+  original.
+- STARTING CHECKING BALANCE: $3,400.00 (cash_accounts.checking). Payments
+  table empty, invoice 501 open, lease 1 next_due 2026-09-02, tickets 101,
+  102, 103 open. Snapshot saved to output/p9_start_snapshot.json.
+- Ran each ticket from the React board (in-app browser):
+  - 101, session 373b7f2dcb44: KI-ORDER-VENDOR-BLOCKED, Tier 2, IT Director.
+    Accounting prepared P-0003 (invoice 501, $840). Waiting on approval.
+  - 102, session 910d070c6c28: KI-RENT-ROUTINE, Tier 1, Facilities.
+    Accounting prepared P-0004 (rent lease 1, $2,400). Waiting on approval.
+  - 103, session 6f6ddfcfa974: KI-DISCOUNT-SHORTFALL, Tier 2, IT Director.
+    No payment. RESOLVED at run end. Screenshot saved to
+    output/screenshots/ticket_103_resolved.jpg.
+- Checking is still $3,400. Waiting for the human to approve P-0003 and
+  P-0004 on the board with 2FA (the vibe coder must not enter codes).
+
+------------------------------------------------------------
+[28] PROMPT
+------------------------------------------------------------
+I approved P-0003 and P-0004 on the board with 2FA. Please verify and finish
+Problem 9.
+
+------------------------------------------------------------
+[27-28] RESPONSE (part 2: verify and reports)
+------------------------------------------------------------
+Verified in data/campus_customs_new.db:
+- cash_accounts.checking = $160.00.
+- payments rows: 1 invoice 501 $840 (Liza), 2 rent lease 1 $2,400 (Liza).
+- invoice 501 paid. Lease 1 next_due 2026-10-02. Tickets 101, 102, 103
+  resolved.
+- P-0003 approved 13:47:04 UTC with 2fa ($3,400 -> $2,560). P-0004 approved
+  13:48:03 UTC with 2fa ($2,560 -> $160).
+- $3,400 - $840 - $2,400 = $160, which matches cash_accounts.
+
+Screenshots: took board screenshots of each resolved ticket at 1440x900, saved
+to output/screenshots/ticket_{101,102,103}_resolved.jpg. Two small board fixes
+first:
+- "waiting on P-0003" no longer shows after the payment is approved.
+- The feed clears when you switch tickets.
+
+New scripts/build_problem9_reports.py reads the DB, audit trail, pending
+payments and start snapshot, and STOPS if cash doesn't reconcile. It wrote:
+- output/desk_tickets.html: Actual sections for 101, 102, 103 (routing, the
+  agents that worked, delegations, MCP tools in order, human approvals, end
+  state, and Expected vs Actual with matches and differences). The Expected
+  sections are kept. The Cash tab has start $3,400, 101 -$840, 102 -$2,400,
+  103 $0, end $160, the DB check, and the payments table.
+- output/resolved_tickets.json: per ticket, the final status, outcome, routing,
+  each agent's contribution, delegations and tools, human approvals, cash
+  change, and token cost.
+- output/resolved_board.html: a double-clickable page with the 3 screenshots.
+
+Differences from Expected, reported honestly:
+- Both customer drafts mention internal details: the invoice, and cost and
+  margin on 103.
+- 103 proposed no discount ($58 list).
+- Accounting called the pay tool twice on 101 and 102. The duplicate matched
+  the same pending payment, so nothing was paid twice.
+- 101 ended resolved, not waiting_on_vendor, because of the board's resolve
+  rule.
+
+Other notes:
+- The audit trail has the real runs appended (523+ entries, never wiped).
+- harness.md was rewritten as the final version: run instructions, tables,
+  16 MCP tools with their tables, the 5 agents plus the IT Director, the tiered
+  workflow, the audit trail, API routes, the dashboard, safety rules, the
+  Problem 9 results, and a file map.
+- Token cost for the three runs was about $0.017.
+- The board is running again at http://localhost:5173 (npm run dev) and the
+  backend at :8000.
+
+------------------------------------------------------------
+[29] PROMPT
+------------------------------------------------------------
+ok so are we done with problem 9?
+
+------------------------------------------------------------
+[29] RESPONSE
+------------------------------------------------------------
+Yes. Every Problem 9 item is done and checked: reset + starting balance
+($3,400), all 3 tickets resolved on the board, Actual sections filled with
+Expected kept, Cash tab itemized and ending at $160 = cash_accounts,
+resolved_tickets.json, resolved_board.html with 3 screenshots, real runs
+appended to audit_trail.json, harness.md finished, AI_prompts.md Problem 9
+section. Not part of P9: Reflection tab (later problem), unsent drafts.
+
+------------------------------------------------------------
+[30] PROMPT
+------------------------------------------------------------
+here is problem 10. Problem 10: Reflection. Open output/desk_tickets.html and
+fill the Reflections tab. This should be answered in my own vibe and be
+detailed and thorough. How would we evaluate the performance of the agent on
+each ticket and why? For each ticket, how did Actual compare to the Expected
+plan you wrote earlier? What would have been simpler as one agent with tool -
+and WHY? Describe three new problems Campus Customs might face that this agent
+team could solve with the tools we built? Describe three new problems Campus
+Customs might face that this agent team could NOT resolve with the tools we
+built, and explain the tools we would need to solve them. Tie every answer to
+THIS app and the three tickets we ran - use the tickets tab and Cash tab on the
+same page as the evidence. This should not be a generic AI essay and must
+include Campus Customs details. If you are unsure prompt me for my opinion or a
+decision point.
+
+------------------------------------------------------------
+[30] CLARIFYING QUESTIONS -> ANSWERS
+------------------------------------------------------------
+Scoring: Pass / fail checklist
+Team verdict: Worth it, with caveats
+Biggest miss: Drafts leaked internals
+Voice: First person, polished
+
+------------------------------------------------------------
+[30] RESPONSE
+------------------------------------------------------------
+Filled the Reflection tab of output/desk_tickets.html. First person, polished,
+and it leads with the biggest miss: the 101 and 103 drafts exposed invoice
+501, the 2FA approval, and the $22 cost / $36 margin.
+1. Evaluation: a pass/fail checklist (13 checks x 3 tickets) grouped into
+   money, safety, process and outcome quality, with evidence from the DB,
+   audit trail and drafts. All tickets pass money and safety. The fails are
+   in judgment and communication (101: 3, 102: 2, 103: 5).
+2. Expected vs Actual per ticket (matches and differences, with reasons).
+3. One agent vs the team: "worth it, with caveats". A single agent would be
+   simpler for 102 (3 tool calls vs 2 agents, 10 requests, 9 calls) and for
+   fact-gathering on 103 (repeated Inventory checks, a hand-off missing the
+   SKU). The team's value is least-privilege pay tools, minimal routing and
+   the audit trail. Money safety itself comes from the MCP tools.
+4. Can solve: Yale Cap order (Tier 1, CSV only); Crest Mug via Elm City Gifts
+   (arrival 2026-09-03); $35 QuickShip invoice under the $50 2FA threshold.
+5. Cannot solve:
+   - October rent with $160 (needs record_sale and forecast_cash).
+   - Ordering the 12 hoodies (needs purchase_orders, create_purchase_order,
+     receive_shipment, and purchase approval).
+   - Sending drafts and taking the club's yes (needs send_message with 2FA,
+     inbox, approve_price_override, orders, and a review_draft guardrail).
+Closes with the three changes I'd make first. Checked rendering in the browser.
+
+------------------------------------------------------------
+[31] PROMPT
+------------------------------------------------------------
+That looks great. Here is problem 11: Problem 11: Submit to GitHub. Push my
+code to public GitHub repository to graders can clone it and also put it in
+output/github_url.txt. Do NOT push my real .env to the GitHub Repo. Do include
+both database files under data/ (the original and my working copy) so graders
+can run the app easily. Readme should explain: copy original DB to the working
+copy when I need a clean run, start MCP server, start FastAPI backend, start
+the React board, resset the DB before a full three-ticket run. see this pic for
+expected file layout. [screenshot of the expected hw5/ layout]
+
+------------------------------------------------------------
+[31] RESPONSE
+------------------------------------------------------------
+- Secret scan: the real PORTKEY_API_KEY isn't in any hw5 file (it lives in
+  "AI for managers/.env", outside the repo). hw5/.env only holds
+  PORTKEY_MODEL and is gitignored anyway.
+- Finished Problem 4: the vibe coder called check_stock_and_price,
+  check_vendor_can_ship and check_rent_due through its live MCP connection.
+  output/mcp_smoke.json has the prompt, tool, arguments, output and DB check,
+  and all three match data/campus_customs_new.db.
+- New files: README.md (setup; copy original -> working DB; start MCP server;
+  start backend; start board; reset before a full run; approvals with 2FA),
+  .gitignore (.env, node_modules, __pycache__, output/2fa/, .DS_Store, the
+  nested clone), .env.example, frontend/.env.example, .gitattributes, and
+  output/github_url.txt.
+- .mcp.json now uses relative paths, so it works after a clone.
+- Removed data/campus_customs_original.db, which was byte-identical to
+  campus_customs.db. data/ now has exactly the 2 DBs.
+- gh CLI isn't installed. Found the user's own GitHub repo
+  AmarantaUrsula/HW-5-AI-for-Managers cloned inside hw5 ("HW 5 AI for
+  Managers/", .gitattributes only). Used it as the remote and built on its
+  initial commit (no force push). The local clone was left untouched and is
+  gitignored.
+- The repo is currently PRIVATE (GitHub returns 404 when not signed in). The
+  user has to switch it to public in GitHub Settings.

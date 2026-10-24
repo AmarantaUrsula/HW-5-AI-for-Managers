@@ -1,0 +1,239 @@
+{
+  "run": "Problem 9 full run after reset",
+  "shop_date": "2026-08-31",
+  "starting_checking": 3400.0,
+  "ending_checking": 160.0,
+  "ending_checking_matches_cash_accounts": true,
+  "tickets": [
+    {
+      "id": 101,
+      "subject": "Bulldog tee",
+      "requester": "Tauhid Zaman",
+      "final_status": "resolved",
+      "session_id": "373b7f2dcb44",
+      "routing": {
+        "known_issue": "KI-ORDER-VENDOR-BLOCKED",
+        "tier": 2,
+        "sent_to": "it_director",
+        "route": [
+          "inventory",
+          "accounting",
+          "customer_service"
+        ]
+      },
+      "outcome": "Invoice 501 ($840) was paid after human 2FA approval, so Bulldog Print Co can ship the size S reprint (earliest 2026-09-05). A customer update draft is saved for Tauhid Zaman (not sent).",
+      "agents": [
+        {
+          "agent": "it_director",
+          "asked_by": null,
+          "contribution": "Took the Tier 2 ticket and delegated to inventory, accounting and customer_service in order. Set the ticket note.",
+          "delegated_to": [
+            "inventory",
+            "accounting",
+            "customer_service"
+          ],
+          "tools_used": [
+            "get_ticket",
+            "triage_ticket",
+            "update_ticket"
+          ],
+          "drafts_saved": [
+            "output/drafts/ticket_101_tauhid_zaman_20261024_094328_954423.md"
+          ]
+        },
+        {
+          "agent": "inventory",
+          "asked_by": "it_director",
+          "contribution": "Confirmed 0 on hand (short 1), Bulldog blocked by open invoice 501, and earliest arrival 2026-09-05 if paid.",
+          "delegated_to": [],
+          "tools_used": [
+            "get_ticket",
+            "check_stock_and_price",
+            "list_vendors",
+            "check_vendor_can_ship"
+          ],
+          "drafts_saved": []
+        },
+        {
+          "agent": "accounting",
+          "asked_by": "it_director",
+          "contribution": "Checked cash ($3,400; $160 after all obligations), previewed and prepared payment P-0003 for $840 (not paid by the agent).",
+          "delegated_to": [],
+          "tools_used": [
+            "get_cash_position",
+            "get_ticket",
+            "preview_payment",
+            "pay_invoice",
+            "pay_invoice",
+            "update_ticket"
+          ],
+          "drafts_saved": []
+        },
+        {
+          "agent": "customer_service",
+          "asked_by": "it_director",
+          "contribution": "Saved a customer update draft for Tauhid Zaman (not sent).",
+          "delegated_to": [],
+          "tools_used": [
+            "get_ticket",
+            "draft_message"
+          ],
+          "drafts_saved": [
+            "output/drafts/ticket_101_tauhid_zaman_20261024_094328_954423.md"
+          ]
+        }
+      ],
+      "human_approvals": [
+        {
+          "payment": "P-0003",
+          "kind": "invoice",
+          "ref_id": 501,
+          "amount": 840.0,
+          "payee": "Bulldog Print Co",
+          "approved_by": "Liza",
+          "factor": "2fa",
+          "approved_at": "2026-10-24T13:47:04+00:00",
+          "payments_row_id": 1
+        }
+      ],
+      "cash_change": -840.0,
+      "checking_after": 2560.0,
+      "token_cost_usd": 0.007
+    },
+    {
+      "id": 102,
+      "subject": "Rent due",
+      "requester": "Elm City Properties",
+      "final_status": "resolved",
+      "session_id": "910d070c6c28",
+      "routing": {
+        "known_issue": "KI-RENT-ROUTINE",
+        "tier": 1,
+        "sent_to": "facilities",
+        "route": [
+          "facilities",
+          "accounting"
+        ]
+      },
+      "outcome": "Rent of $2,400 for lease 1 was paid after human 2FA approval. The next rent is due 2026-10-02.",
+      "agents": [
+        {
+          "agent": "facilities",
+          "asked_by": null,
+          "contribution": "Tier 1 owner: checked the notice against lease 1 ($2,400 due 2026-09-02, not overdue) and handed off to accounting.",
+          "delegated_to": [
+            "accounting"
+          ],
+          "tools_used": [
+            "get_ticket",
+            "check_rent_due"
+          ],
+          "drafts_saved": []
+        },
+        {
+          "agent": "accounting",
+          "asked_by": "facilities",
+          "contribution": "Previewed and prepared rent payment P-0004 for $2,400 (not paid by the agent), and set the ticket to waiting_on_approval.",
+          "delegated_to": [],
+          "tools_used": [
+            "get_cash_position",
+            "get_ticket",
+            "preview_payment",
+            "pay_rent",
+            "pay_rent",
+            "update_ticket"
+          ],
+          "drafts_saved": []
+        }
+      ],
+      "human_approvals": [
+        {
+          "payment": "P-0004",
+          "kind": "rent",
+          "ref_id": 1,
+          "amount": 2400.0,
+          "payee": "Elm City Properties",
+          "approved_by": "Liza",
+          "factor": "2fa",
+          "approved_at": "2026-10-24T13:48:03+00:00",
+          "payments_row_id": 2
+        }
+      ],
+      "cash_change": -2400.0,
+      "checking_after": 160.0,
+      "token_cost_usd": 0.0027
+    },
+    {
+      "id": 103,
+      "subject": "Bulk hoodie discount",
+      "requester": "Yale AI Club",
+      "final_status": "resolved",
+      "session_id": "6f6ddfcfa974",
+      "routing": {
+        "known_issue": "KI-DISCOUNT-SHORTFALL",
+        "tier": 2,
+        "sent_to": "it_director",
+        "route": [
+          "inventory",
+          "customer_service"
+        ]
+      },
+      "outcome": "No money moved. 8 hoodies are on hand and 12 are short. A no-discount offer ($58 each, $1,160 for 20) was saved as a draft for the Yale AI Club, pending human review (not sent).",
+      "agents": [
+        {
+          "agent": "it_director",
+          "asked_by": null,
+          "contribution": "Took the Tier 2 ticket and delegated to inventory, then customer_service. Set the ticket note.",
+          "delegated_to": [
+            "inventory",
+            "customer_service"
+          ],
+          "tools_used": [
+            "update_ticket"
+          ],
+          "drafts_saved": [
+            "output/drafts/ticket_103_yale_ai_club_20261024_094357_334924.md"
+          ]
+        },
+        {
+          "agent": "inventory",
+          "asked_by": "it_director",
+          "contribution": "Confirmed 8 on hand, short 12, and the Bulldog block (earliest 2026-09-05 if unblocked). Rechecked when asked by customer_service.",
+          "delegated_to": [],
+          "tools_used": [
+            "get_ticket",
+            "check_stock_and_price",
+            "list_vendors",
+            "check_vendor_can_ship",
+            "get_ticket",
+            "check_stock_and_price",
+            "list_vendors",
+            "check_vendor_can_ship"
+          ],
+          "drafts_saved": []
+        },
+        {
+          "agent": "customer_service",
+          "asked_by": "it_director",
+          "contribution": "Quoted the bulk order and saved a no-discount offer draft ($58 each, $1,160) for the Yale AI Club (not sent).",
+          "delegated_to": [
+            "inventory"
+          ],
+          "tools_used": [
+            "get_ticket",
+            "check_stock_and_price",
+            "quote_bulk_discount",
+            "draft_message"
+          ],
+          "drafts_saved": [
+            "output/drafts/ticket_103_yale_ai_club_20261024_094357_334924.md"
+          ]
+        }
+      ],
+      "human_approvals": [],
+      "cash_change": 0.0,
+      "checking_after": 160.0,
+      "token_cost_usd": 0.0076
+    }
+  ]
+}
