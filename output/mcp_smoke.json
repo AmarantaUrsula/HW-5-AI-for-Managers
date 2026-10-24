@@ -1,0 +1,108 @@
+{
+  "problem": "Problem 4: Add the MCP server to the vibe coder and test each tool",
+  "connection": {
+    "config_file": ".mcp.json",
+    "server": "campus-customs",
+    "transport": "stdio",
+    "vibe_coder_tool_names": [
+      "mcp__campus-customs__check_stock_and_price",
+      "mcp__campus-customs__check_vendor_can_ship",
+      "mcp__campus-customs__check_rent_due"
+    ]
+  },
+  "tested_at": "2026-10-24T10:24:45-04:00",
+  "database": "data/campus_customs_new.db (state after the Problem 9 run: invoice 501 paid, rent paid, checking $160)",
+  "note": "The vibe coder called these three tools through its live MCP connection. Each prompt is the Problem 4 request I typed in the vibe coder. The tool calls were made when the smoke test was finished during Problem 11.",
+  "tests": [
+    {
+      "prompt": "ok so here is the work for this problem 4: add your MCP server to this project so you (the vibe coder) can call the tools. Save the connection JSON text in .mcp.json at the project root. Make sure you, the vibe coder is connect, then test EACH of your three MCP tools. Save the evidence in output/mcp_smoke.json. For every tool include: the prompt I asked for here (aka in the vibe coder), the tool name, the tool output (must match values in data/campus_customs_new.db",
+      "tool": "check_stock_and_price",
+      "arguments": {
+        "sku": "CC-HOOD-NAVY",
+        "size": "M",
+        "qty_requested": 20
+      },
+      "ticket": 103,
+      "output": {
+        "sku": "CC-HOOD-NAVY",
+        "name": "Basic Hoodie Big Yale",
+        "size": "M",
+        "location": "Aisle A",
+        "qty_requested": 20,
+        "qty_on_hand": 8,
+        "can_fill_from_stock": false,
+        "shortfall": 12,
+        "unit_cost": 22,
+        "list_price": 58,
+        "list_total": 1160,
+        "min_unit_price_no_loss": 22
+      },
+      "db_check": {
+        "inventory.qty": 8,
+        "inventory.location": "Aisle A",
+        "pricing.unit_cost": 22.0,
+        "pricing.list_price": 58.0
+      },
+      "matches_db": true
+    },
+    {
+      "prompt": "ok so here is the work for this problem 4: add your MCP server to this project so you (the vibe coder) can call the tools. Save the connection JSON text in .mcp.json at the project root. Make sure you, the vibe coder is connect, then test EACH of your three MCP tools. Save the evidence in output/mcp_smoke.json. For every tool include: the prompt I asked for here (aka in the vibe coder), the tool name, the tool output (must match values in data/campus_customs_new.db",
+      "tool": "check_vendor_can_ship",
+      "arguments": {
+        "vendor_id": 1
+      },
+      "ticket": 101,
+      "output": {
+        "today": "2026-08-31",
+        "vendor_id": 1,
+        "vendor_name": "Bulldog Print Co",
+        "specialty": "apparel reprint",
+        "lead_days": 5,
+        "can_ship": true,
+        "blocking_open_invoices": [],
+        "amount_to_unblock": 0,
+        "earliest_arrival_if_ordered_today": "2026-09-05",
+        "earliest_arrival_if_unblocked_today": "2026-09-05"
+      },
+      "db_check": {
+        "desk.date_today": "2026-08-31",
+        "vendors.name": "Bulldog Print Co",
+        "vendors.lead_days": 5,
+        "open invoices for vendor 1": 0
+      },
+      "matches_db": true
+    },
+    {
+      "prompt": "ok so here is the work for this problem 4: add your MCP server to this project so you (the vibe coder) can call the tools. Save the connection JSON text in .mcp.json at the project root. Make sure you, the vibe coder is connect, then test EACH of your three MCP tools. Save the evidence in output/mcp_smoke.json. For every tool include: the prompt I asked for here (aka in the vibe coder), the tool name, the tool output (must match values in data/campus_customs_new.db",
+      "tool": "check_rent_due",
+      "arguments": {
+        "lease_id": 1
+      },
+      "ticket": 102,
+      "output": {
+        "today": "2026-08-31",
+        "lease_id": 1,
+        "space_name": "Chapel Street shop",
+        "landlord": "Elm City Properties",
+        "monthly_rent": 2400,
+        "next_due": "2026-10-02",
+        "days_until_due": 32,
+        "overdue": false,
+        "cash_accounts": [
+          {
+            "account": "checking",
+            "balance": 160,
+            "can_cover_rent": false,
+            "balance_after_rent": -2240
+          }
+        ]
+      },
+      "db_check": {
+        "leases.monthly_rent": 2400.0,
+        "leases.next_due": "2026-10-02",
+        "cash_accounts.checking": 160.0
+      },
+      "matches_db": true
+    }
+  ]
+}

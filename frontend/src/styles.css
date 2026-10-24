@@ -1,0 +1,69 @@
+/* Quiet, dense, data-first. Colour is reserved for agent identity (Okabe–Ito) and errors. */
+:root {
+  --ink: #1a1a1a; --muted: #6b6b6b; --rule: #dcdcdc; --hover: #f4f4f4; --select: #ebeef3;
+  --error: #b00020;
+  font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  color: var(--ink); background: #fff;
+  font-variant-numeric: tabular-nums;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+h1 { font-size: 15px; margin: 0; }
+h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 14px 0 4px; font-weight: 600; }
+h3 { font-size: 13px; margin: 8px 0 4px; }
+
+header { display: flex; gap: 18px; align-items: baseline; padding: 8px 14px; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+header .right { margin-left: auto; }
+main { display: grid; grid-template-columns: minmax(300px, 25%) 1fr minmax(320px, 27%); gap: 0; min-height: calc(100vh - 40px); }
+.col { padding: 0 14px 20px; border-right: 1px solid var(--rule); overflow: auto; }
+.col:last-child { border-right: 0; }
+
+table { border-collapse: collapse; width: 100%; }
+.grid th { text-align: left; font-weight: 600; color: var(--muted); font-size: 11px; border-bottom: 1px solid var(--ink); padding: 3px 6px 3px 0; }
+.grid td { border-bottom: 1px solid var(--rule); padding: 4px 6px 4px 0; vertical-align: top; }
+.grid.compact td, .grid.compact th { padding: 2px 6px 2px 0; }
+.kv td { padding: 1px 8px 1px 0; vertical-align: top; }
+.kv td:first-child { color: var(--muted); white-space: nowrap; }
+.num { text-align: right; white-space: nowrap; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+.small { font-size: 12px; }
+.muted { color: var(--muted); }
+.strong { font-weight: 600; }
+.big { font-size: 22px; font-weight: 600; margin: 0 8px; }
+.error { color: var(--error); }
+.banner { padding: 6px 14px; border-bottom: 1px solid var(--rule); }
+.empty { margin: 4px 0; }
+
+.tickets tbody tr { cursor: pointer; }
+.tickets tbody tr:hover { background: var(--hover); }
+.tickets tr.selected { background: var(--select); box-shadow: inset 3px 0 0 var(--ink); }
+.tickets tr.selected td:first-child { padding-left: 6px; }
+.tickets tr.resolved td { color: var(--muted); }
+.tickets tr.resolved .state { color: var(--ink); font-weight: 600; }
+.tickets td.state { white-space: nowrap; }
+
+.ticket-detail { margin: 8px 0; }
+.notes { white-space: pre-wrap; font-size: 11px; margin: 4px 0; color: var(--muted); }
+
+.agent-tag { display: inline-block; border-left: 4px solid; padding-left: 5px; white-space: nowrap; }
+.agent-tag b { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; }
+.agent-name { color: var(--ink); }
+
+.feed { table-layout: fixed; }
+.feed td { overflow-wrap: anywhere; }
+.feed tr.ev-dispatch td, .feed tr.ev-run_end td { background: #fafafa; }
+.feed tr.ev-approval_decision td.said, .feed tr[class*="ev-payment"] td.said { font-weight: 600; }
+
+.balance { display: flex; align-items: baseline; margin: 2px 0 4px; }
+.stepline { display: block; margin: 2px 0 8px; }
+.total td { border-top: 1px solid var(--ink); font-weight: 600; }
+
+.approval { border-top: 1px solid var(--ink); padding: 6px 0 10px; }
+.approval-head { margin-bottom: 4px; }
+.form-row { display: flex; gap: 6px; margin: 6px 0 2px; flex-wrap: wrap; }
+input { font: inherit; padding: 3px 6px; border: 1px solid #999; border-radius: 2px; min-width: 0; }
+input.code { width: 100px; font-family: ui-monospace, Menlo, monospace; letter-spacing: .1em; }
+button { font: inherit; padding: 3px 10px; border: 1px solid #555; background: #fff; border-radius: 2px; cursor: pointer; }
+button.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+button:disabled { opacity: .45; cursor: default; }
+details summary { cursor: pointer; color: var(--muted); margin-top: 6px; }

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus Customs — Desk Tickets</title>
+<style>
+  :root {
+    --ink: #1f2430; --muted: #5b6475; --line: #dde1e8; --bg: #f6f7f9; --card: #fff;
+    --navy: #0f2a4a; --accent: #1d5fa8; --ok: #1e7a46; --warn: #a3620a; --stop: #a32626;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color: var(--ink); background: var(--bg); }
+  header { background: var(--navy); color: #fff; padding: 20px 32px 0; }
+  header h1 { margin: 0 0 4px; font-size: 22px; }
+  header p { margin: 0 0 16px; color: #c9d4e3; font-size: 13px; }
+  nav { display: flex; gap: 4px; flex-wrap: wrap; }
+  nav button { border: 0; background: transparent; color: #c9d4e3; padding: 10px 18px; font: inherit; font-weight: 600; cursor: pointer; border-radius: 8px 8px 0 0; }
+  nav button:hover { color: #fff; }
+  nav button.active { background: var(--bg); color: var(--navy); }
+  main { max-width: 1060px; margin: 0 auto; padding: 24px 32px 64px; }
+  .tab { display: none; }
+  .tab.active { display: block; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px 24px; margin-bottom: 20px; }
+  h2 { margin: 0 0 4px; font-size: 20px; }
+  h3 { margin: 0 0 12px; font-size: 16px; color: var(--navy); text-transform: uppercase; letter-spacing: .04em; }
+  h4 { margin: 20px 0 8px; font-size: 14px; }
+  .sub { color: var(--muted); margin: 0 0 12px; }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 12px; }
+  .fact { background: var(--bg); border-radius: 8px; padding: 8px 12px; }
+  .fact b { display: block; font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { background: var(--bg); font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  td:first-child { width: 28px; color: var(--muted); }
+  code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; background: #eef1f5; padding: 1px 5px; border-radius: 4px; }
+  .role { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: #e7eef8; color: var(--accent); white-space: nowrap; }
+  .role.it { background: #efe9f8; color: #5b3a9a; }
+  .role.human { background: #fdf0dc; color: var(--warn); }
+  ul { margin: 0; padding-left: 20px; }
+  li { margin: 3px 0; }
+  .gate { border-left: 4px solid var(--warn); background: #fffaf1; padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+  .never { border-left: 4px solid var(--stop); background: #fff5f5; padding: 10px 14px; border-radius: 0 8px 8px 0; }
+  .end { border-left: 4px solid var(--ok); background: #f3faf6; padding: 10px 14px; border-radius: 0 8px 8px 0; }
+  .actual { border: 2px dashed var(--line); background: transparent; min-height: 180px; }
+  .actual p { color: var(--muted); font-style: italic; }
+  .later { color: var(--muted); font-style: italic; }
+  .tier { display:inline-block; font-weight:700; font-size:13px; padding:3px 10px; border-radius:6px; margin-right:6px; }
+  .tier1 { background:#e6f4ec; color:var(--ok); } .tier2 { background:#efe9f8; color:#5b3a9a; } .tier3 { background:#fdecec; color:var(--stop); }
+  .route { border:1px solid var(--line); border-radius:8px; padding:10px 14px; margin:12px 0; background:#fafbfc; }
+
+  .actual-filled { border: 2px solid var(--accent); }
+  .compare { list-style: none; padding-left: 0; }
+  .compare li { padding: 4px 0 4px 10px; border-left: 4px solid var(--line); margin: 4px 0; }
+  .compare li.match { border-left-color: var(--ok); }
+  .compare li.differs { border-left-color: var(--warn); }
+  .cashtbl td.num, .cashtbl th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .cashtbl tr.total td { border-top: 2px solid var(--ink); font-weight: 700; }
+
+  .checklist { font-size: 13px; }
+  .checklist td.pass { background: #eef6f1; }
+  .checklist td.fail { background: #fbefe6; font-weight: 600; }
+  .checklist td.na { color: var(--muted); }
+  .checklist tr.verdict td { border-top: 2px solid var(--ink); }
+  .scenarios > li { margin: 10px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Campus Customs — Desk Tickets</h1>
+  <p>Tiered workflow: the desk runs <code style="background:#24476f;color:#fff">triage_ticket</code> on each ticket. <b>Tier 1</b> routine known issues go straight to staff, <b>Tier 2</b> goes to the IT Director, <b>Tier 3</b> (cash conflict) goes to the Boss.<br>Shop date (desk.date_today): <b>2026-08-31</b> &nbsp;·&nbsp; Checking: <b>$3,400.00</b> &nbsp;·&nbsp; Working DB: data/campus_customs_new.db &nbsp;·&nbsp; Model: gpt-6-luna via Portkey</p>
+  <nav>
+    <button data-tab="t101" class="active">Ticket 101</button>
+    <button data-tab="t102">Ticket 102</button>
+    <button data-tab="t103">Ticket 103</button>
+    <button data-tab="cash">Cash</button>
+    <button data-tab="reflection">Reflection</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ============================================================ 101 -->
+<section class="tab active" id="t101">
+  <div class="card">
+    <h2>Ticket 101 — Bulldog tee</h2>
+    <p class="sub">customer_order from <b>Tauhid Zaman</b>: "Needs a tee in size S."</p>
+    <div class="facts">
+      <div class="fact"><b>Item</b>CC-TEE-WHITE, size S, qty 1</div>
+      <div class="fact"><b>Stock</b>0 on hand (Aisle B)</div>
+      <div class="fact"><b>Price</b>$28 list / $8 cost</div>
+      <div class="fact"><b>Linked invoice</b>#501 Bulldog Print Co, $840, due 2026-08-28, <b>open</b></div>
+      <div class="fact"><b>Vendor lead time</b>5 days</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Expected</h3>
+    <p>The tee is out of stock. Invoice 501 is the "Rush reprint CC-TEE-WHITE S" for this exact tee, and it's 3 days overdue, so Bulldog won't ship. Paying 501 is what unblocks this ticket. That payment needs a human with two-factor approval.</p>
+
+    <div class="route"><span class="tier tier2">Tier 2 → IT Director</span> Known issue <code>KI-ORDER-VENDOR-BLOCKED</code>. This isn't routine, because the vendor is blocked by an open invoice and unblocking it needs an $840 payment with human 2FA. The IT Director assigns only <b>inventory → accounting → customer_service</b>. Facilities isn't involved, and the Boss isn't needed because there's no cash conflict ($160 is left after all obligations).</div>
+
+    <h4>Expected steps</h4>
+    <table>
+      <tr><th>#</th><th>Agent</th><th>MCP tool / action</th><th>Expected result</th></tr>
+      <tr><td>1</td><td>Desk dispatcher</td><td><code>triage_ticket(101)</code></td><td>KI-ORDER-VENDOR-BLOCKED, <b>tier 2</b>. Escalation reasons: "Bulldog Print Co blocked by open invoice 501 ($840.00, due 2026-08-28)" and "unblocking needs a $840.00 payment, so human 2FA is required". The ticket is sent to the IT Director.</td></tr>
+      <tr><td>2</td><td><span class="role it">IT Director</span></td><td><code>delegate</code> to the route's staff, in order</td><td>Delegates to inventory, then accounting, then customer_service. No one outside the route.</td></tr>
+      <tr><td>3</td><td><span class="role">Inventory</span></td><td><code>check_stock_and_price("CC-TEE-WHITE","S",1)</code></td><td>qty_on_hand <b>0</b>, shortfall <b>1</b>, unit cost $8, list $28.</td></tr>
+      <tr><td>4</td><td><span class="role">Inventory</span></td><td><code>list_vendors</code>, then <code>check_vendor_can_ship(1)</code></td><td>Bulldog Print Co (apparel reprint): <b>can_ship = false</b>, blocked by invoice 501 ($840, 3 days overdue). If it's paid today, the earliest arrival is <b>2026-09-05</b> (2026-08-31 + 5 days).</td></tr>
+      <tr><td>5</td><td><span class="role">Accounting</span></td><td><code>get_cash_position</code></td><td>$3,400 cash. Obligations: invoice 501 $840 (overdue) + rent $2,400 (due 2026-09-02) = $3,240, leaving <b>$160</b>.</td></tr>
+      <tr><td>6</td><td><span class="role">Accounting</span></td><td><code>preview_payment("invoice",501)</code></td><td>$840 to Bulldog, checking $3,400 → $2,560, enough_cash true, <b>requires_two_factor true</b>.</td></tr>
+      <tr><td>7</td><td><span class="role">Accounting</span></td><td><code>pay_invoice(501)</code>, with approval fields left blank</td><td>The run <b>pauses</b> for a human (see the gate below).</td></tr>
+      <tr><td>8</td><td><span class="role">Customer Service</span></td><td><code>draft_message(101, "Tauhid Zaman", …)</code></td><td>A draft saved to <code>output/drafts/</code>: size S is out of stock and a restock is on the way. Earliest arrival <b>2026-09-05</b>, only if 501 was approved. <b>Not sent.</b></td></tr>
+      <tr><td>9</td><td><span class="role it">IT Director</span></td><td><code>update_ticket(101, …)</code></td><td>Status <b>waiting_on_vendor</b> if 501 was paid, or <b>waiting_on_approval</b> if it was denied, with a note giving the numbers.</td></tr>
+    </table>
+
+    <div class="gate"><b>Human gate.</b> <span class="role human">Human</span> sees "$840.00 to Bulldog Print Co, due 2026-08-28 (OVERDUE), checking $3,400.00 → $2,560.00". They type YES and their name, then enter the one-time 2FA code, because the payment is over $50.</div>
+
+    <h4>Expected end state</h4>
+    <div class="end">
+      <ul>
+        <li><b>If approved:</b> <code>payments</code> gets a new row (invoice, 501, $840, checking, 2026-08-31, approver's name), <code>invoices.501.status = paid</code>, and checking drops by $840. Bulldog can ship again.</li>
+        <li><b>If denied:</b> no database change except the ticket note. 101 stays blocked on invoice 501.</li>
+        <li>Ticket 101 is <b>not resolved</b> in this run either way, because the tee hasn't arrived. One draft is saved.</li>
+      </ul>
+    </div>
+    <h4>Must not happen</h4>
+    <div class="never"><ul>
+      <li>No message is sent to Tauhid. Draft only.</li>
+      <li>No promised date other than 2026-09-05, and none at all if 501 wasn't paid.</li>
+      <li>No payment without the human's YES, name and 2FA code.</li>
+      <li>Facilities isn't pulled in, and the Boss isn't involved, because there's no cash conflict.</li>
+    </ul></div>
+  </div>
+
+  <div class="card actual-filled">
+    <h3>Actual</h3>
+    <p class="sub">Full run after reset · session <code>373b7f2dcb44</code> · shop date 2026-08-31 · 13:43:15–13:43:35 UTC · tokens $0.0070 (gpt-6-luna via Portkey)</p>
+    <div class="route"><span class="tier tier2">Tier 2 → IT Director</span> Desk triage ran <code>triage_ticket(101)</code> and got <code>KI-ORDER-VENDOR-BLOCKED</code>. Route: <b>inventory → accounting → customer_service</b>.</div>
+
+    <h4>Agents that worked, what they delegated, and the tools they used</h4>
+    <table>
+      <tr><th>#</th><th>Agent</th><th>What it did / delegated</th><th>MCP tools used (in order)</th></tr>
+      <tr><td>1</td><td><span class="role it">IT Director</span></td><td>Delegated to <b>Inventory</b>: “Ticket 101: Confirm the stock shortfall and whether Bulldog Print Co can ship once invoice 501 is cleared. Order link: SKU CC-TEE-WHITE, size S, qty 1; invoice_id 501. Follow the i…”<br>Delegated to <b>Accounting</b>: “Ticket 101: Confirm blocking invoice 501 for Bulldog Print Co ($840.00, due 2026-08-28) and request payment through the payment workflow, which should pause for human 2FA because i…”<br>Delegated to <b>Customer Service</b>: “Ticket 101: Draft (do not send) a customer update for Tauhid Zaman about order SKU CC-TEE-WHITE, size S, qty 1. Invoice 501 payment request P-0003 is awaiting human 2FA approval; v…”<br>Saved draft (not sent): <code>output/drafts/ticket_101_tauhid_zaman_20261024_094328_954423.md</code><br>Reported: Await human 2FA approval for P-0003. Once approved and invoice 501 clears, Bulldog Print Co can ship; earliest arrival reported is 2026-09-05.</td><td><code>get_ticket</code>, <code>triage_ticket</code>, <code>update_ticket</code></td></tr><tr><td>2</td><td><span class="role">Inventory</span><br><span class="sub">asked by IT Director</span></td><td>Reported: Clear invoice 501 to unblock Bulldog Print Co; after clearance, the earliest arrival for the order would be 2026-09-05.</td><td><code>get_ticket</code>, <code>check_stock_and_price</code>, <code>list_vendors</code>, <code>check_vendor_can_ship</code></td></tr><tr><td>3</td><td><span class="role">Accounting</span><br><span class="sub">asked by IT Director</span></td><td>Payment prepared for human approval as P-0003<br>Reported: Await human approval with 2FA. Do not request the same payment again; the ticket is waiting on approval.</td><td><code>get_cash_position</code>, <code>get_ticket</code>, <code>preview_payment</code>, <code>pay_invoice</code>, <code>pay_invoice</code>, <code>update_ticket</code></td></tr><tr><td>4</td><td><span class="role">Customer Service</span><br><span class="sub">asked by IT Director</span></td><td>Saved draft (not sent): <code>output/drafts/ticket_101_tauhid_zaman_20261024_094328_954423.md</code><br>Reported: Draft saved for human review; no message was sent.</td><td><code>get_ticket</code>, <code>draft_message</code></td></tr>
+    </table>
+
+    <h4>Human approvals</h4>
+    <div class="gate"><ul><li>13:46:39 UTC: 2FA code sent for P-0003</li><li>13:47:04 UTC: <b>Liza approved P-0003</b> (2fa): paid $840.00 to Bulldog Print Co, checking $3,400.00 → $2,560.00</li></ul></div>
+
+    <h4>End state (from data/campus_customs_new.db)</h4>
+    <div class="end"><ul>
+      <li>Ticket 101: <b>resolved</b>.</li>
+      <li>Outcome: Invoice 501 ($840) was paid after human 2FA approval, so Bulldog Print Co can ship the size S reprint (earliest 2026-09-05). A customer update draft is saved for Tauhid Zaman (not sent).</li>
+    </ul></div>
+
+    <h4>Expected vs Actual</h4>
+    <ul class="compare"><li class="match"><b>✓ Matches:</b> Triage gave KI-ORDER-VENDOR-BLOCKED, Tier 2, and sent it to the IT Director, as expected.</li><li class="match"><b>✓ Matches:</b> Only the expected route was used: inventory, accounting and customer_service. Facilities and the Boss weren&#x27;t involved.</li><li class="match"><b>✓ Matches:</b> Inventory found 0 on hand (short 1), Bulldog blocked by invoice 501 ($840, 3 days overdue), and earliest arrival 2026-09-05.</li><li class="match"><b>✓ Matches:</b> Accounting called get_cash_position and preview_payment, then pay_invoice, which prepared P-0003 ($840). A human approved it with 2FA, and checking went $3,400.00 → $2,560.00.</li><li class="differs"><b>≠ Differs:</b> Accounting called pay_invoice twice. The second call matched the same pending payment, so only one payment (P-0003) existed and only one was paid.</li><li class="differs"><b>≠ Differs:</b> Expected the final status waiting_on_vendor. It&#x27;s resolved, because the board now marks a ticket resolved once its run is done and nothing waits on a human. The tee itself still arrives 2026-09-05 at the earliest.</li><li class="differs"><b>≠ Differs:</b> The customer draft mentions the invoice and the payment approval to Tauhid. The prompt asks Customer Service not to expose internal money matters. It&#x27;s a draft that was never sent, so a human can edit it.</li></ul>
+  </div>
+</section>
+
+<!-- ============================================================ 102 -->
+<section class="tab" id="t102">
+  <div class="card">
+    <h2>Ticket 102 — Rent due</h2>
+    <p class="sub">rent_notice from <b>Elm City Properties</b>: "Email: shop rent due in 2 days."</p>
+    <div class="facts">
+      <div class="fact"><b>Lease</b>#1 Chapel Street shop</div>
+      <div class="fact"><b>Rent</b>$2,400.00</div>
+      <div class="fact"><b>Next due</b>2026-09-02 (in 2 days)</div>
+      <div class="fact"><b>Overdue?</b>No</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Expected</h3>
+    <p>The notice matches the lease. Rent is the shop's biggest fixed obligation and is due in 2 days, so the team should request payment now. Even after invoice 501 there's enough cash ($2,560 ≥ $2,400). The payment needs a human with two-factor approval.</p>
+
+    <div class="route"><span class="tier tier1">Tier 1 → staff directly</span> Known issue <code>KI-RENT-ROUTINE</code>: the notice matches the lease, rent isn't overdue, and cash covers it. It goes <b>straight to Facilities</b>, which hands off to Accounting. No IT Director, no Boss, and no other staff. Facilities would escalate to the IT Director only if something unexpected came up, such as an amount mismatch or overdue rent.</div>
+
+    <h4>Expected steps</h4>
+    <table>
+      <tr><th>#</th><th>Agent</th><th>MCP tool / action</th><th>Expected result</th></tr>
+      <tr><td>1</td><td>Desk dispatcher</td><td><code>triage_ticket(102)</code></td><td>KI-RENT-ROUTINE, <b>tier 1</b>, no escalation reasons. Sent directly to <b>Facilities</b>, with route facilities → accounting.</td></tr>
+      <tr><td>2</td><td><span class="role">Facilities</span></td><td><code>get_ticket(102)</code>, <code>check_rent_due(1)</code></td><td>$2,400, due 2026-09-02, days_until_due <b>2</b>, overdue false, checking can cover it.</td></tr>
+      <tr><td>3</td><td><span class="role">Facilities</span> → <span class="role">Accounting</span></td><td><code>delegate(accounting)</code></td><td>Asks Accounting to pay lease 1 rent of $2,400, due 2026-09-02.</td></tr>
+      <tr><td>4</td><td><span class="role">Accounting</span></td><td><code>preview_payment("rent",1)</code></td><td>Checking $3,400 → $1,000, or $2,560 → <b>$160</b> if 501 was paid first. enough_cash true, <b>requires_two_factor true</b>.</td></tr>
+      <tr><td>5</td><td><span class="role">Accounting</span></td><td><code>pay_rent(1)</code>, with approval fields left blank</td><td>The run <b>pauses</b> for a human (see the gate below).</td></tr>
+      <tr><td>6</td><td><span class="role">Accounting</span> (last on the route)</td><td><code>update_ticket(102, …)</code></td><td>Status <b>resolved</b> if rent was paid, or <b>waiting_on_approval</b> if it was denied, with a note giving the amount and balance.</td></tr>
+    </table>
+
+    <div class="gate"><b>Human gate.</b> <span class="role human">Human</span> sees "$2,400.00 to Elm City Properties, due 2026-09-02, checking before → after". They type YES and their name, then enter the 2FA code, because the payment is over $50.</div>
+
+    <h4>Expected end state</h4>
+    <div class="end">
+      <ul>
+        <li><b>If approved:</b> <code>payments</code> gets a new row (rent, 1, $2,400, checking, 2026-08-31, approver's name), <code>leases.1.next_due</code> moves to <b>2026-10-02</b>, and checking drops by $2,400.</li>
+        <li><b>If 501 and rent are both approved:</b> checking goes $3,400 → $2,560 → <b>$160</b>.</li>
+        <li><b>If denied:</b> no money moves, and the ticket waits on approval.</li>
+      </ul>
+    </div>
+    <h4>Must not happen</h4>
+    <div class="never"><ul>
+      <li>Nothing is sent to the landlord. Any reply is only a draft.</li>
+      <li>Rent isn't paid twice, because <code>next_due</code> moves forward and the old approval no longer matches.</li>
+      <li>The balance never goes negative, because the pay tool refuses.</li>
+      <li>No IT Director or Boss is involved, because it's routine. Inventory and Customer Service aren't pulled in.</li>
+    </ul></div>
+  </div>
+
+  <div class="card actual-filled">
+    <h3>Actual</h3>
+    <p class="sub">Full run after reset · session <code>910d070c6c28</code> · shop date 2026-08-31 · 13:43:42–13:43:49 UTC · tokens $0.0027 (gpt-6-luna via Portkey)</p>
+    <div class="route"><span class="tier tier1">Tier 1 → Facilities</span> Desk triage ran <code>triage_ticket(102)</code> and got <code>KI-RENT-ROUTINE</code>. Route: <b>facilities → accounting</b>.</div>
+
+    <h4>Agents that worked, what they delegated, and the tools they used</h4>
+    <table>
+      <tr><th>#</th><th>Agent</th><th>What it did / delegated</th><th>MCP tools used (in order)</th></tr>
+      <tr><td>1</td><td><span class="role">Facilities</span></td><td>Delegated to <b>Accounting</b>: “Ticket 102, lease_id 1. Please request the rent payment of $2,400.00 due 2026-09-02. Payment requires human 2FA approval because it is over $50. Facilities verified the lease: toda…”<br>Reported: Await human 2FA approval for P-0004; do not request the payment again.</td><td><code>get_ticket</code>, <code>check_rent_due</code></td></tr><tr><td>2</td><td><span class="role">Accounting</span><br><span class="sub">asked by Facilities</span></td><td>Payment prepared for human approval as P-0004<br>Reported: Await human 2FA approval for P-0004. Do not request the same payment again.</td><td><code>get_cash_position</code>, <code>get_ticket</code>, <code>preview_payment</code>, <code>pay_rent</code>, <code>pay_rent</code>, <code>update_ticket</code></td></tr>
+    </table>
+
+    <h4>Human approvals</h4>
+    <div class="gate"><ul><li>13:47:31 UTC: 2FA code sent for P-0004</li><li>13:48:03 UTC: <b>Liza approved P-0004</b> (2fa): paid $2,400.00 to Elm City Properties, checking $2,560.00 → $160.00</li></ul></div>
+
+    <h4>End state (from data/campus_customs_new.db)</h4>
+    <div class="end"><ul>
+      <li>Ticket 102: <b>resolved</b>.</li>
+      <li>Outcome: Rent of $2,400 for lease 1 was paid after human 2FA approval. The next rent is due 2026-10-02.</li>
+    </ul></div>
+
+    <h4>Expected vs Actual</h4>
+    <ul class="compare"><li class="match"><b>✓ Matches:</b> Triage gave KI-RENT-ROUTINE, Tier 1, and sent it straight to Facilities. No IT Director and no Boss, as expected.</li><li class="match"><b>✓ Matches:</b> Facilities ran check_rent_due(1): $2,400, due 2026-09-02, in 2 days. It handed off only to Accounting.</li><li class="match"><b>✓ Matches:</b> Accounting ran preview_payment, then pay_rent, which prepared P-0004 ($2,400). A human approved it with 2FA, and checking went $2,560.00 → $160.00.</li><li class="match"><b>✓ Matches:</b> Lease 1 next_due moved 2026-09-02 → 2026-10-02, and the ticket is resolved.</li><li class="differs"><b>≠ Differs:</b> Accounting called pay_rent twice. The duplicate matched the same pending P-0004, so it was paid once.</li></ul>
+  </div>
+</section>
+
+<!-- ============================================================ 103 -->
+<section class="tab" id="t103">
+  <div class="card">
+    <h2>Ticket 103 — Bulk hoodie discount</h2>
+    <p class="sub">price_override from <b>Yale AI Club</b>: "Student org wants 20 hoodies, size M, asking for a bulk discount."</p>
+    <div class="facts">
+      <div class="fact"><b>Item</b>CC-HOOD-NAVY, size M, qty 20</div>
+      <div class="fact"><b>Stock</b>8 on hand (Aisle A), short 12</div>
+      <div class="fact"><b>Price</b>$58 list / $22 cost</div>
+      <div class="fact"><b>Restock vendor</b>Bulldog Print Co (blocked by 501)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Expected</h3>
+    <p>No money moves on this ticket. The team should price a discount that stays above cost, be honest that only 8 of the 20 are on hand, and leave the discount decision to a human. The reply is a draft only.</p>
+
+    <div class="route"><span class="tier tier2">Tier 2 → IT Director</span> Known issue <code>KI-DISCOUNT-SHORTFALL</code>. A discount for stock on hand would be Tier 1, straight to Customer Service. Here they want 20 and only 8 are on hand, so the IT Director assigns only <b>inventory → customer_service</b>. Accounting and Facilities aren't involved, because no money moves on this ticket.</div>
+
+    <h4>Expected steps</h4>
+    <table>
+      <tr><th>#</th><th>Agent</th><th>MCP tool / action</th><th>Expected result</th></tr>
+      <tr><td>1</td><td>Desk dispatcher</td><td><code>triage_ticket(103)</code></td><td>KI-DISCOUNT-SHORTFALL, <b>tier 2</b>. Escalation reason: "requested 20 but only 8 on hand (short 12)". Sent to the IT Director.</td></tr>
+      <tr><td>2</td><td><span class="role">Inventory</span></td><td><code>check_stock_and_price("CC-HOOD-NAVY","M",20)</code></td><td>qty_on_hand <b>8</b>, shortfall <b>12</b>, unit cost $22, list $58 (list total $1,160).</td></tr>
+      <tr><td>3</td><td><span class="role">Inventory</span></td><td><code>check_vendor_can_ship(1)</code></td><td>Bulldog is blocked while 501 is open. If unblocked today, the earliest arrival is <b>2026-09-05</b>.</td></tr>
+      <tr><td>4</td><td><span class="role">Customer Service</span></td><td><code>quote_bulk_discount("CC-HOOD-NAVY","M",20, pct)</code></td><td>For example, 10% off is $52.20 each, $1,044 total, $604 margin. The largest discount without a loss is <b>62.07%</b>. Any proposal must stay above the $22 cost.</td></tr>
+      <tr><td>5</td><td><span class="role">Customer Service</span></td><td><code>draft_message(103, "Yale AI Club", …)</code></td><td>A draft offer: 8 hoodies available now, the remaining 12 depend on a restock, and the discounted price is a <b>proposal pending approval</b>. <b>Not sent.</b></td></tr>
+      <tr><td>6</td><td><span class="role it">IT Director</span></td><td><code>update_ticket(103, …)</code></td><td>Status <b>waiting_on_approval</b> (a human approves the discount), with a note on the quote and the shortfall.</td></tr>
+    </table>
+
+    <div class="gate"><b>Human gate.</b> <span class="role human">Human</span> decides whether to offer the discount and what to do about the 12 missing hoodies. Agents only propose.</div>
+
+    <h4>Expected end state</h4>
+    <div class="end">
+      <ul>
+        <li>No payment and no change to inventory or pricing. Restocking 12 at the $22 cost would be $264, more than the $160 left if 501 and rent are both paid, so a restock can't be funded in this run.</li>
+        <li>One draft is saved to <code>output/drafts/</code>, and the ticket note records the quote.</li>
+      </ul>
+    </div>
+    <h4>Must not happen</h4>
+    <div class="never"><ul>
+      <li>No price at or below the $22 unit cost.</li>
+      <li>No promise of all 20 hoodies, or of a delivery date the tools don't support.</li>
+      <li>Nothing is sent to the Yale AI Club, and no restock is ordered from Bulldog. No vendor contact, and no money moves.</li>
+      <li>Accounting and Facilities aren't pulled in, because they're not on the route.</li>
+    </ul></div>
+  </div>
+
+  <div class="card actual-filled">
+    <h3>Actual</h3>
+    <p class="sub">Full run after reset · session <code>6f6ddfcfa974</code> · shop date 2026-08-31 · 13:43:53–13:44:04 UTC · tokens $0.0076 (gpt-6-luna via Portkey)</p>
+    <div class="route"><span class="tier tier2">Tier 2 → IT Director</span> Desk triage ran <code>triage_ticket(103)</code> and got <code>KI-DISCOUNT-SHORTFALL</code>. Route: <b>inventory → customer_service</b>.</div>
+
+    <h4>Agents that worked, what they delegated, and the tools they used</h4>
+    <table>
+      <tr><th>#</th><th>Agent</th><th>What it did / delegated</th><th>MCP tools used (in order)</th></tr>
+      <tr><td>1</td><td><span class="role it">IT Director</span></td><td>Delegated to <b>Inventory</b>: “Ticket 103, linked SKU/size/qty are not supplied in the triage payload; retrieve ticket 103 to confirm them. For the requested quantity 20, triage reports 8 on hand and a shortfall…”<br>Delegated to <b>Customer Service</b>: “Ticket 103, SKU CC-HOOD-NAVY, size M, qty 20. Inventory confirms 8 on hand (short 12); Bulldog Print Co cannot ship pending open invoice 501 ($840, 3 days overdue); if unblocked to…”<br>Saved draft (not sent): <code>output/drafts/ticket_103_yale_ai_club_20261024_094357_334924.md</code><br>Reported: Review and approve or revise the draft offer and fulfillment terms. Do not promise restock timing unless the vendor is unblocked and confirms shipment.</td><td><code>update_ticket</code></td></tr><tr><td>2</td><td><span class="role">Inventory</span><br><span class="sub">asked by IT Director</span></td><td>Reported: The claimed invoice block and conditional 2026-09-05 arrival are supported. No current restock arrival date is available until the invoice is cleared; only 4 units are short of the queried 12.</td><td><code>get_ticket</code>, <code>check_stock_and_price</code>, <code>list_vendors</code>, <code>check_vendor_can_ship</code>, <code>get_ticket</code>, <code>check_stock_and_price</code>, <code>list_vendors</code>, <code>check_vendor_can_ship</code></td></tr><tr><td>3</td><td><span class="role">Customer Service</span><br><span class="sub">asked by IT Director</span></td><td>Delegated to <b>Inventory</b>: “Ticket 103: verify restock/arrival facts for CC-HOOD-NAVY size M, qty 12 short. Request includes claim Bulldog Print Co shipment blocked by open invoice 501 ($840, 3 days overdue),…”<br>Saved draft (not sent): <code>output/drafts/ticket_103_yale_ai_club_20261024_094357_334924.md</code><br>Reported: Review and approve or revise the no-discount proposal and any partial/conditional fulfillment. Do not represent the vendor arrival as confirmed while invoice 501 remains open.</td><td><code>get_ticket</code>, <code>check_stock_and_price</code>, <code>quote_bulk_discount</code>, <code>draft_message</code></td></tr>
+    </table>
+
+    <h4>Human approvals</h4>
+    <div class="gate"><ul><li>None needed. No payment was prepared on this ticket.</li></ul></div>
+
+    <h4>End state (from data/campus_customs_new.db)</h4>
+    <div class="end"><ul>
+      <li>Ticket 103: <b>resolved</b>.</li>
+      <li>Outcome: No money moved. 8 hoodies are on hand and 12 are short. A no-discount offer ($58 each, $1,160 for 20) was saved as a draft for the Yale AI Club, pending human review (not sent).</li>
+    </ul></div>
+
+    <h4>Expected vs Actual</h4>
+    <ul class="compare"><li class="match"><b>✓ Matches:</b> Triage gave KI-DISCOUNT-SHORTFALL, Tier 2, and sent it to the IT Director. Only inventory and customer_service were used, with no Accounting and no Facilities.</li><li class="match"><b>✓ Matches:</b> Inventory found 8 on hand, short 12. Bulldog was still blocked, because 501 wasn&#x27;t paid yet when 103 ran at 09:43. Earliest arrival 2026-09-05 if unblocked.</li><li class="match"><b>✓ Matches:</b> Customer Service ran quote_bulk_discount and saved a draft. No money moved, and the ticket resolved at the end of the run.</li><li class="differs"><b>≠ Differs:</b> Customer Service proposed no discount ($58 list, $1,160 for 20), where a discount above the $22 cost was expected. That&#x27;s allowed, because the price stays above cost, but the club asked for a discount.</li><li class="differs"><b>≠ Differs:</b> The draft shows the club the internal unit cost, the margin and the overdue invoice. It shouldn&#x27;t. A human must edit it before sending.</li><li class="differs"><b>≠ Differs:</b> Customer Service delegated back to Inventory to recheck facts, an extra step that was allowed by the route. Inventory&#x27;s reply included a confusing line (&#x27;only 4 units are short&#x27;). The ticket note and the draft still use the correct numbers (8 on hand, short 12).</li></ul>
+  </div>
+</section>
+
+<!-- ============================================================ later -->
+<section class="tab" id="cash">
+  <div class="card">
+    <h3>Cash</h3>
+    <p class="sub">Problem 9 full run. Cash only goes out; revenue isn't modeled. Every number below was read from <code>data/campus_customs_new.db</code> and <code>output/pending_payments.json</code> by <code>scripts/build_problem9_reports.py</code>, which stops with an error if the totals don't reconcile.</p>
+    <table class="cashtbl">
+      <tr><th>Step</th><th>Why (which pay or purchase)</th><th>Type</th><th class="num">Change</th><th class="num">Checking after</th></tr>
+      <tr><td>Start</td><td>Checking after <code>POST /api/reset</code> (2026-10-24T09:43:06-04:00)</td><td></td><td class="num"></td><td class="num">$3,400.00</td></tr><tr><td>Ticket 101 resolved</td><td>P-0003: invoice 501 to Bulldog Print Co. Prepared by Accounting, approved by Liza with 2fa at 13:47:04 UTC. Recorded as <code>payments.id = 1</code>.</td><td>Pay</td><td class="num">-$840.00</td><td class="num">$2,560.00</td></tr><tr><td>Ticket 102 resolved</td><td>P-0004: rent for lease 1 to Elm City Properties. Prepared by Accounting, approved by Liza with 2fa at 13:48:03 UTC. Recorded as <code>payments.id = 2</code>.</td><td>Pay</td><td class="num">-$2,400.00</td><td class="num">$160.00</td></tr><tr><td>Ticket 103 resolved</td><td>No pay or purchase. The discount reply is a draft, and the 12-unit shortfall wasn't reordered (there's no purchase table, and there was no approval).</td><td>—</td><td class="num">$0.00</td><td class="num">$160.00</td></tr><tr class="total"><td>End</td><td>Ending checking balance (sum of the changes above)</td><td></td><td class="num">-$3,240.00</td><td class="num">$160.00</td></tr>
+    </table>
+
+    <h4>Check against the working database</h4>
+    <div class="end"><ul>
+      <li><code>cash_accounts</code>: checking = <b>$160.00</b> (date 2026-08-31). Itemized ending balance = <b>$160.00</b>. <b>They match ✓</b></li>
+      <li>$3,400.00 − $840.00 − $2,400.00 = $160.00 ✓</li>
+      <li>Invoice 501 status: <b>paid</b>. Lease 1 next_due: <b>2026-10-02</b>.</li>
+      <li>Every payment had human approval with 2FA (over $50), and the balance never went negative.</li>
+    </ul></div>
+
+    <h4><code>payments</code> table (working DB)</h4>
+    <table class="cashtbl">
+      <tr><th>id</th><th>kind</th><th>ref_id</th><th class="num">amount</th><th>account</th><th>paid_at (shop date)</th><th>approved_by</th></tr>
+      <tr><td>1</td><td>invoice</td><td>501</td><td class="num">$840.00</td><td>checking</td><td>2026-08-31</td><td>Liza</td></tr><tr><td>2</td><td>rent</td><td>1</td><td class="num">$2,400.00</td><td>checking</td><td>2026-08-31</td><td>Liza</td></tr>
+    </table>
+    <p class="sub">Looking ahead: the next rent of $2,400 is due 2026-10-02, and only $160.00 is left. With no revenue modeled, that rent can't be paid. The pay tool would refuse it.</p>
+  </div>
+</section>
+
+<section class="tab" id="reflection">
+  <div class="card">
+    <h3>Reflection</h3>
+    <p class="sub">Problem 10. Written after the Problem 9 full run (shop date 2026-08-31; checking $3,400.00 → $160.00). Every claim below points to the ticket tabs (Expected vs Actual) and the Cash tab on this page.</p>
+
+    <p>Before I evaluate anything, I want to start with the miss that bothers me most, because it isn't a cash error and the board wouldn't catch it. <b>Our Customer Service agent leaked internal business details into both customer drafts.</b>
+    The Ticket 101 draft tells Tauhid Zaman that his tee is "awaiting payment approval" and that "the payment request for invoice 501 is awaiting human 2FA approval".
+    The Ticket 103 draft tells the Yale AI Club our <b>$22 unit cost</b>, our <b>$36 per hoodie margin ($720 total)</b>, and that invoice 501 for $840 is "3 days overdue".
+    The prompt in <code>backend/prompts/customer_service.md</code> said never to mention internal cash problems. Every number in those drafts is true, and every number came from an MCP tool, so the "never invent data" rule held. But a true fact can still be the wrong fact to share with a customer.
+    The only thing that kept this from becoming a real incident is the rule I set at the start: <b>drafts stay on board</b> (<code>draft_message</code> writes to <code>output/drafts/</code> and never sends). That rule did exactly the job it was designed to do.</p>
+
+    <!-- ============================================================ Q1 -->
+    <h4>1. How I would evaluate the agents' performance on each ticket, and why</h4>
+    <p>I chose a <b>pass/fail checklist</b> over a single score. At Campus Customs, some failures are disqualifying no matter how good the rest is. A wrong balance in <code>cash_accounts</code>, a payment without human 2FA, or a message actually sent to a customer can't be averaged away by good routing.
+    Each check below maps to a rule in <code>RULES.md</code> or a line in the Expected plan, and it can be verified from the working database, <code>output/audit_trail.json</code>, or the drafts folder. It doesn't depend on the agents' own description of what they did. The checks fall into four groups:</p>
+    <ul>
+      <li><b>Money</b> (the most important): was the cash change correct and approved by a human?</li>
+      <li><b>Safety:</b> did anything leave the building, and did the balance stay positive?</li>
+      <li><b>Process:</b> was the tier right, were only the needed staff involved, and was the work done without wasted calls?</li>
+      <li><b>Outcome quality:</b> would I send the draft as written, and does the ticket status reflect reality?</li>
+    </ul>
+
+    <table class="checklist">
+      <tr><th>Check</th><th>101 · Bulldog tee</th><th>102 · Rent due</th><th>103 · Bulk hoodies</th></tr>
+      <tr><td>Triage gave the right known issue and tier</td>
+        <td class="pass">✓ KI-ORDER-VENDOR-BLOCKED, Tier 2</td><td class="pass">✓ KI-RENT-ROUTINE, Tier 1</td><td class="pass">✓ KI-DISCOUNT-SHORTFALL, Tier 2</td></tr>
+      <tr><td>Only the staff on the route worked the ticket (not every specialist)</td>
+        <td class="pass">✓ ITD → INV, ACC, CSV. No Facilities, no Boss.</td><td class="pass">✓ FAC → ACC only. No director.</td><td class="pass">✓ ITD → INV, CSV. No Accounting or Facilities.</td></tr>
+      <tr><td>Facts match the database (desk date 2026-08-31, lead_days)</td>
+        <td class="pass">✓ 0 size S on hand. 501 is $840, 3 days overdue. Arrival 2026-09-05.</td><td class="pass">✓ $2,400 due 2026-09-02, in 2 days.</td><td class="pass">✓ 8 on hand, short 12. Bulldog blocked when 103 ran at 09:43.</td></tr>
+      <tr><td>Money moved only after a human approved with 2FA</td>
+        <td class="pass">✓ P-0003, Liza, 2fa</td><td class="pass">✓ P-0004, Liza, 2fa</td><td class="pass">✓ No money moved</td></tr>
+      <tr><td>Cash change is correct and matches <code>cash_accounts</code> (Cash tab)</td>
+        <td class="pass">✓ −$840.00 → $2,560.00</td><td class="pass">✓ −$2,400.00 → $160.00</td><td class="pass">✓ $0.00 → $160.00</td></tr>
+      <tr><td>No negative balance, and every linked record updated</td>
+        <td class="pass">✓ <code>payments</code> row 1, invoice 501 paid</td><td class="pass">✓ <code>payments</code> row 2, lease 1 next_due 2026-10-02</td><td class="pass">✓ n/a</td></tr>
+      <tr><td>Nothing sent to a customer, vendor or landlord</td>
+        <td class="pass">✓ Draft only</td><td class="pass">✓ Nothing drafted or sent</td><td class="pass">✓ Draft only</td></tr>
+      <tr><td>Customer draft is ready to send as written</td>
+        <td class="fail">✗ Mentions invoice 501 and "human 2FA approval"</td><td class="na">n/a, no reply needed</td><td class="fail">✗ Shows cost, margin, and the overdue invoice</td></tr>
+      <tr><td>Responded to what the requester actually asked</td>
+        <td class="pass">✓ Gave a real earliest date (2026-09-05)</td><td class="pass">✓ Rent paid before due date</td><td class="fail">✗ They asked for a discount and got $58 list (0%), even though the tool said up to 62.07% off was still above cost</td></tr>
+      <tr><td>No wasted or duplicate calls</td>
+        <td class="fail">✗ <code>pay_invoice</code> called twice (deduped into one P-0003)</td><td class="fail">✗ <code>pay_rent</code> called twice (deduped into one P-0004)</td><td class="fail">✗ CSV sent Inventory back to recheck facts. INV's reply said "only 4 units are short".</td></tr>
+      <tr><td>Hand-offs carried the facts the next agent needed</td>
+        <td class="pass">✓ ITD's requests named the SKU, size and invoice</td><td class="pass">✓ FAC passed lease 1, $2,400, due date</td><td class="fail">✗ ITD's first hand-off said "linked SKU/size/qty are not supplied in the triage payload" (my dispatcher's brief didn't include the SKU)</td></tr>
+      <tr><td>Final status reflects reality</td>
+        <td class="fail">✗ Shows resolved, but the tee arrives 2026-09-05 at the earliest</td><td class="pass">✓ Resolved: rent is paid</td><td class="fail">✗ Shows resolved, but the offer is an unsent draft awaiting price approval</td></tr>
+      <tr><td>Thought about cash beyond this ticket</td>
+        <td class="pass">✓ ACC noted $160 left after all obligations</td><td class="fail">✗ Paid, but nobody flagged that the next $2,400 (due 2026-10-02) can't be covered from $160</td><td class="na">n/a</td></tr>
+      <tr class="verdict"><td>Verdict</td>
+        <td><b>Pass</b> on money and safety. <b>3 quality fails.</b></td><td><b>Pass</b>. Cleanest run. <b>2 fails</b>, both minor.</td><td><b>Pass</b> on safety. <b>Weakest outcome, 5 fails.</b></td></tr>
+    </table>
+    <p>All three tickets pass the checks that would cost us points or money: the Cash tab ends at <b>$160.00</b>, matching <code>cash_accounts</code>, and both payments carry a human name and the <code>2fa</code> factor.
+    The failures cluster in <b>judgment and communication</b>, not in mechanics. That tells me the hard rules I wrote into the tools (signed approvals, cash refusal, draft-only messaging, route enforcement) worked. The soft rules I only wrote into prompts ("don't mention internal cash problems", "propose a discount") were followed unevenly.</p>
+
+    <!-- ============================================================ Q2 -->
+    <h4>2. How Actual compared to the Expected plan for each ticket</h4>
+    <table>
+      <tr><th>Ticket</th><th>Where Actual matched Expected</th><th>Where it differed, and what that tells me</th></tr>
+      <tr><td><b>101</b><br>Tauhid Zaman<br>Bulldog tee, size S</td>
+        <td>
+          <ul>
+            <li>The plan was Tier 2 to the IT Director, then Inventory → Accounting → Customer Service, and that's exactly what ran.</li>
+            <li>Inventory found 0 size S on hand, and Bulldog Print Co was blocked by invoice 501 ($840, due 2026-08-28).</li>
+            <li>Accounting prepared P-0003. I approved it with 2FA, and checking went $3,400.00 → $2,560.00, the exact number in the Expected "If approved" box.</li>
+          </ul>
+        </td>
+        <td>
+          <ul>
+            <li>Expected ended at <code>waiting_on_vendor</code>. Actual ended at <code>resolved</code>. That's because in Problem 8 I asked the board to mark a ticket resolved once the run finishes and nothing waits on a human. So "resolved" on the board means "the desk is done", not "Tauhid has his shirt".</li>
+            <li>The draft also broke the Expected "must not happen" spirit by talking about the invoice.</li>
+          </ul>
+        </td></tr>
+      <tr><td><b>102</b><br>Elm City Properties<br>Rent due</td>
+        <td>
+          <ul>
+            <li>This is the closest match. It went Tier 1, straight to Facilities, with no director and no Boss.</li>
+            <li><code>check_rent_due(1)</code> confirmed $2,400, due in 2 days, then Facilities handed off to Accounting.</li>
+            <li>P-0004 was approved with 2FA. Checking went $2,560.00 → $160.00, and lease 1 next_due moved to 2026-10-02, exactly as the Expected end state predicted ("$3,400 → $2,560 → $160").</li>
+          </ul>
+        </td>
+        <td>
+          <ul>
+            <li>The only differences were the duplicate <code>pay_rent</code> call and the missing look-ahead: nobody noticed that paying left $160 against the next $2,400.</li>
+            <li>The Expected plan didn't ask for a landlord reply, and none was drafted. That's fine for a routine notice.</li>
+          </ul>
+        </td></tr>
+      <tr><td><b>103</b><br>Yale AI Club<br>20 hoodies, size M</td>
+        <td>
+          <ul>
+            <li>Tier 2 to the IT Director, then only Inventory → Customer Service. Accounting and Facilities stayed out, as planned.</li>
+            <li>8 on hand, short 12, no money moved, and a draft was saved, not sent.</li>
+          </ul>
+        </td>
+        <td>
+          <ul>
+            <li>Expected a <b>discount proposal above the $22 cost</b>, giving the 10% example ($52.20 each, $1,044). Actual was <b>0% off ($58, $1,160)</b>.</li>
+            <li>Expected status <code>waiting_on_approval</code>. Actual is <code>resolved</code>.</li>
+            <li>There was an extra Customer Service → Inventory recheck that the plan didn't include.</li>
+            <li>This is the ticket where the agents were most cautious and least helpful. They protected margin, but they didn't answer the club's actual question.</li>
+          </ul>
+        </td></tr>
+    </table>
+
+    <!-- ============================================================ Q3 -->
+    <h4>3. What would have been simpler as one agent with tools, and why</h4>
+    <p>My overall view is that the team was <b>worth it, with caveats</b>. The run data on this page shows where the team earned its complexity and where a single agent with the same 16 MCP tools would have been simpler.</p>
+    <p><b>What would have been simpler as one agent:</b></p>
+    <ul>
+      <li><b>Ticket 102 end to end.</b> A routine rent notice is three tool calls: <code>check_rent_due(1)</code> → <code>preview_payment("rent",1)</code> → <code>pay_rent(1)</code>. The team needed 2 agents, a hand-off, 10 model requests and 9 tool calls to get there.
+        A single agent would have had the lease facts in its own context instead of re-sending them to Accounting in a delegation message. It would also have been less likely to call <code>pay_rent</code> twice, since that duplicate came from Accounting re-asking after the pause.</li>
+      <li><b>Fact-gathering on 101 and 103.</b> On 103, the IT Director asked Inventory for stock, then Customer Service asked Inventory again (16 tool calls, $0.0076, the most expensive run).
+        Every hand-off is a lossy summary: the IT Director's first message even said the SKU wasn't in its brief. One agent calling <code>check_stock_and_price</code>, <code>check_vendor_can_ship</code> and <code>quote_bulk_discount</code> in sequence would have had all the numbers in one place, and probably would have caught that 62% headroom existed.</li>
+      <li><b>Consistency of voice.</b> The 101 draft repeated Accounting's internal language ("awaiting human 2FA approval") because the IT Director passed P-0003's status to Customer Service in the hand-off, and Customer Service treated it as something to tell the customer. A single agent knows which facts are internal and which are customer-facing, and writes one coherent story.</li>
+    </ul>
+    <p><b>Why I still think the team was worth it:</b></p>
+    <ul>
+      <li><b>Least privilege on money.</b> Only Accounting holds <code>pay_invoice</code> and <code>pay_rent</code>. Inventory, Facilities and Customer Service <i>can't</i> move cash, even by mistake. With one agent, every tool sits in one context, and the only thing between a misread ticket and a payment is the approval gate.</li>
+      <li><b>Routing kept the work small.</b> The tiers sent 102 to one staff member with no director, and 103 never touched Accounting. The Expected plan predicted that, and the Actual tabs show it happened.</li>
+      <li><b>Auditability.</b> Because each step is tagged with an agent and depth in <code>audit_trail.json</code>, I can see that the leaked cost figures came from Customer Service on a hand-off from the IT Director, and that's where to fix the prompt. One agent's log would be one long transcript.</li>
+      <li><b>Scale.</b> With three tickets this is overbuilt. With thirty open tickets on a Monday of move-in week, triage → Tier 1 staff is how I'd want work divided.</li>
+    </ul>
+    <p>The <b>caveat</b> is that the money safety didn't actually come from having multiple agents. It came from the tools: the signed approval, the $50 2FA threshold, the cash refusal and draft-only messaging live in the MCP server, so one agent would have been just as safe on money. The team's real value is in least privilege, routing and the audit trail, and those only pay off at higher volume.</p>
+
+    <!-- ============================================================ Q4 -->
+    <h4>4. Three new problems this agent team <u>could</u> solve with the tools we built</h4>
+    <ol class="scenarios">
+      <li><b>A student orders 3 Yale Caps.</b> <code>triage_ticket</code> would match <code>KI-ORDER-INSTOCK</code> (40 CC-HAT-BLUE on hand), so it's Tier 1, straight to Customer Service.
+        <ul>
+          <li>Customer Service runs <code>check_stock_and_price("CC-HAT-BLUE","OS",3)</code> ($22 list, $6 cost), drafts a confirmation with <code>draft_message</code>, and closes the ticket with <code>update_ticket</code>.</li>
+          <li>One agent, no director, no money. It's the cheapest path in the playbook, and the opposite of ticket 101's four-agent chain.</li>
+        </ul></li>
+      <li><b>A customer orders a Crest Mug, which is out of stock (0 on hand).</b> Unlike the tee in 101, the restock vendor isn't blocked, so this is <code>KI-ORDER-RESTOCK</code>, Tier 1: Inventory → Customer Service.
+        <ul>
+          <li>Inventory uses <code>list_vendors</code> to pick <b>Elm City Gifts</b> ("mugs and small goods", 3 lead days, no open invoices) and <code>check_vendor_can_ship(2)</code>, which gives an earliest arrival of <b>2026-09-03</b>.</li>
+          <li>Customer Service drafts that date to the customer.</li>
+          <li>It shows the team handling a "101-style" order <i>without</i> the Accounting detour, because the blocker isn't there.</li>
+        </ul></li>
+      <li><b>QuickShip CT bills a $35 courier invoice</b>, for example to deliver Tauhid's tee once it arrives, entered into <code>invoices</code>. Accounting can <code>preview_payment</code> and <code>pay_invoice</code>.
+        <ul>
+          <li>Because $35 is under the <b>$50 two-factor threshold</b>, a single human approval is enough, while P-0003 and P-0004 needed 2FA.</li>
+          <li><code>preview_payment</code> would show $160.00 → $125.00, so it still fits the cash we have left on the Cash tab.</li>
+          <li>It's a good test that the threshold logic behaves differently below $50.</li>
+        </ul></li>
+    </ol>
+
+    <!-- ============================================================ Q5 -->
+    <h4>5. Three new problems this agent team <u>could not</u> resolve with our tools, and what we'd need</h4>
+    <ol class="scenarios">
+      <li><b>The October rent: $2,400 due 2026-10-02 with $160 in checking.</b> The Cash tab already shows this coming. The team can see the problem: <code>triage_ticket</code> would push it to <b>Tier 3 (Boss)</b> as a cash conflict, and <code>preview_payment</code> would return <code>enough_cash: false</code>. But it can't fix it.
+        <ul>
+          <li>The pay tool will (correctly) refuse, and there's no revenue in our model: no sales table, and no way to record that the 8 hoodies or 40 caps were sold.</li>
+          <li><b>Tools needed:</b> a <code>sales</code>/<code>receipts</code> table with <code>record_sale</code> (so cash can go up), a <code>forecast_cash(days)</code> tool to warn <i>before</i> approving P-0004 that it would leave $160 against the next rent, and possibly a <code>request_payment_plan</code> draft to Elm City Properties, approved by a human.</li>
+        </ul></li>
+      <li><b>Actually ordering the 12 missing hoodies for the Yale AI Club.</b> Ticket 103 stopped at "short 12", because there's nothing to place an order with. The approve route only covers invoices and rent, and "purchase" doesn't exist in the database.
+        <ul>
+          <li><b>Tools needed:</b>
+            <ul>
+              <li>a <code>purchase_orders</code> table</li>
+              <li><code>create_purchase_order(vendor_id, sku, size, qty)</code>, priced from vendor quotes rather than assuming <code>pricing.unit_cost</code> (12 × $22 = $264, which is more than the $160 we have)</li>
+              <li>a human-approval and 2FA step for purchases like the one for payments</li>
+              <li><code>receive_shipment</code> to add to <code>inventory.qty</code> when Bulldog delivers</li>
+            </ul></li>
+          <li>Then 103 could become a real order instead of a draft.</li>
+        </ul></li>
+      <li><b>Closing the loop with customers:</b> sending the reviewed draft, getting the Yale AI Club's "yes", and honoring an approved price. Today <code>draft_message</code> only writes a file, there's no inbox, and there's no table for an approved price override on an order.
+        <ul>
+          <li><b>Tools needed:</b>
+            <ul>
+              <li><code>send_message</code>, gated by human approval (and 2FA, per our safety rule on contacting customers)</li>
+              <li>an inbox tool that turns replies into tickets</li>
+              <li><code>approve_price_override(ticket_id, unit_price)</code> plus an <code>orders</code> table</li>
+            </ul></li>
+          <li><b>A draft-review guardrail:</b> just as important, given my biggest miss, a <code>review_draft</code> tool that checks a draft against a block-list (unit cost, margin, invoice numbers, "overdue", "2FA") before a human ever sees it.</li>
+          <li>Writing "don't mention internal cash" in a prompt wasn't enough. It needs to be enforced in code, the way the cash rules are.</li>
+        </ul></li>
+    </ol>
+
+    <!-- ============================================================ close -->
+    <h4>What I'd change first</h4>
+    <ol>
+      <li><b>Move the soft rules into tools.</b> Add a draft redaction check in <code>draft_message</code> (no cost, margin, invoice or approval language to customers), and refuse a <code>price_override</code> reply that ignores the requested discount without giving a reason.</li>
+      <li><b>Separate "desk done" from "customer done".</b> Add a status like <code>waiting_on_vendor</code> or <code>offer_pending</code> that the board treats as finished for the agents but not resolved for the customer. Then 101 and 103 wouldn't look finished when Tauhid has no shirt and the club has no offer.</li>
+      <li><b>Look ahead before paying.</b> Have <code>preview_payment</code> report cash after <i>all</i> upcoming obligations, so my approval of P-0004 would have shown "this leaves $160 against $2,400 due 2026-10-02" right on the approval card.</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<script>
+  const buttons = document.querySelectorAll("nav button");
+  function show(id) {
+    buttons.forEach(b => b.classList.toggle("active", b.dataset.tab === id));
+    document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.id === id));
+    history.replaceState(null, "", "#" + id);
+  }
+  buttons.forEach(b => b.addEventListener("click", () => show(b.dataset.tab)));
+  if (location.hash && document.getElementById(location.hash.slice(1))) show(location.hash.slice(1));
+</script>
+</body>
+</html>
