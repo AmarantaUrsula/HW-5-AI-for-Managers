@@ -171,7 +171,12 @@ worth it, which miss mattered most, and my voice), so the vibe coder asked me th
 **Prompt:**
 > That looks great. Here is problem 11: Problem 11: Submit to GitHub. Push my code to a public GitHub repository so graders can clone it and also put it in output/github_url.txt. Do NOT push my real .env to the GitHub repo. Do include both database files under data/ (the original and my working copy) so graders can run the app easily. README should explain: copy original DB to the working copy when I need a clean run, start MCP server, start FastAPI backend, start the React board, reset the DB before a full three-ticket run. See this pic for expected file layout. *(attached screenshot of the expected hw5/ layout)*
 
-**Follow-up prompt:** none yet.
+**Follow-up prompt:**
+> I made the repo public. Please confirm it's visible without signing in, then commit and push the latest log entry.
+
+**What was lacking after the first prompt:** The GitHub repo I had created was private, and the vibe coder couldn't
+change its visibility (no GitHub CLI, and it wouldn't use my stored token). I made it public myself, and the follow-up had
+the vibe coder confirm graders can clone it without signing in and push the final log entry.
 
 ---
 

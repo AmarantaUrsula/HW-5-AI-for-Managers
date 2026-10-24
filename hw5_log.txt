@@ -1057,3 +1057,30 @@ expected file layout. [screenshot of the expected hw5/ layout]
   gitignored.
 - The repo is currently PRIVATE (GitHub returns 404 when not signed in). The
   user has to switch it to public in GitHub Settings.
+- Committed e616f19 "HW5: Campus Customs multi-agent desk" on top of the
+  repo's initial commit, and pushed to origin/main (fast-forward). Checked
+  first: the real key isn't in any staged file, and no .env, node_modules or
+  output/2fa was staged.
+- Fresh-clone check: every file in the expected layout is present; no .env;
+  no node_modules; both DBs present (original intact, working copy at $160);
+  .mcp.json launches the server with 16 tools; the frontend passes tsc after
+  npm ci.
+- STILL NEEDED FROM THE HUMAN: make the repo public (GitHub -> repo Settings
+  -> General -> Danger Zone -> Change visibility -> Public). This log entry
+  itself is a local change that isn't pushed yet.
+
+------------------------------------------------------------
+[32] PROMPT
+------------------------------------------------------------
+I made the repo public. Please confirm it's visible without signing in, then
+commit and push the latest log entry.
+
+------------------------------------------------------------
+[32] RESPONSE
+------------------------------------------------------------
+Confirmed public without signing in:
+- https://github.com/AmarantaUrsula/HW-5-AI-for-Managers returns HTTP 200.
+- The GitHub API reports visibility "public".
+- A clone with no credentials succeeded (HEAD e616f19).
+Committed and pushed hw5_log.txt (the Problem 11 entries plus this one) and
+the AI_prompts.md Problem 11 follow-up.
