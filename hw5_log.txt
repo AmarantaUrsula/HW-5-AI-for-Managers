@@ -1107,3 +1107,13 @@ using that port for another project now
 - README has a "Port 8000 or 5173 already in use?" section. harness.md and
   backend/main.py notes were updated.
 - Committed locally. Not pushed yet; waiting for the human's OK.
+
+------------------------------------------------------------
+[34] PROMPT
+------------------------------------------------------------
+Yes, push the port change to GitHub.
+
+------------------------------------------------------------
+[34] RESPONSE
+------------------------------------------------------------
+Pushed commit c7e23b1 (port change), plus this log entry, to origin/main.
