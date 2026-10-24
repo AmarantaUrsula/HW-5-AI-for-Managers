@@ -1084,3 +1084,26 @@ Confirmed public without signing in:
 - A clone with no credentials succeeded (HEAD e616f19).
 Committed and pushed hw5_log.txt (the Problem 11 entries plus this one) and
 the AI_prompts.md Problem 11 follow-up.
+
+------------------------------------------------------------
+[33] PROMPT
+------------------------------------------------------------
+Is there a way to use another port so graders can see these websites? I am
+using that port for another project now
+
+------------------------------------------------------------
+[33] RESPONSE
+------------------------------------------------------------
+- Graders don't load my localhost. They clone the repo and run the backend and
+  board on their own machine, so the default stays 8000 (the assignment says
+  the board talks to http://localhost:8000).
+- Made the ports movable: the backend CORS now allows the board from any
+  localhost / 127.0.0.1 port (allow_origin_regex). Outside origins are still
+  rejected (tested). The board already reads VITE_API_BASE from
+  frontend/.env.
+- My machine: frontend/.env (gitignored) now points to
+  http://localhost:8001. The backend is running on 8001 (16 MCP tools) and the
+  board was restarted on 5173. Verified the board calls 8001 and CORS passes.
+- README has a "Port 8000 or 5173 already in use?" section. harness.md and
+  backend/main.py notes were updated.
+- Committed locally. Not pushed yet; waiting for the human's OK.

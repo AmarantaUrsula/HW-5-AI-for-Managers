@@ -77,7 +77,19 @@ cd frontend
 npm run dev
 ```
 
-This opens http://localhost:5173. The board calls the backend at `http://localhost:8000`, set in `frontend/.env.example`, which is also the default. The backend's CORS allows `http://localhost:5173`.
+This opens http://localhost:5173. The board calls the backend at `http://localhost:8000`, set in `frontend/.env.example`, which is also the default. The backend's CORS allows the board from any localhost port.
+
+### Port 8000 or 5173 already in use?
+
+The defaults are backend **8000** and board **5173**. Either can move:
+
+```bash
+cd backend && uvicorn main:app --reload --port 8001                       # backend on another port
+echo "VITE_API_BASE=http://localhost:8001" > ../frontend/.env              # tell the board where it is
+cd ../frontend && npm run dev -- --port 5174                               # board on another port, if needed
+```
+
+The backend accepts the board from **any** `localhost` or `127.0.0.1` port (CORS), so no code changes are needed. `frontend/.env` is gitignored, so this override stays on your machine. Restart `npm run dev` after changing it.
 
 ## 5. Reset the DB before a full three-ticket run
 

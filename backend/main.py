@@ -3,6 +3,7 @@
 Start it from the backend/ folder:
     cd hw5/backend
     uvicorn main:app --reload --port 8000
+(Port 8000 busy? Use e.g. --port 8001 and set VITE_API_BASE=http://localhost:8001 in frontend/.env.)
 (or from hw5/: python3 -m uvicorn backend.main:app --reload --port 8000)
 
 Rules this API keeps:
@@ -75,7 +76,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Campus Customs desk API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://127.0.0.1:3000"],
+    # The Vite board (default http://localhost:5173) on any local port, so either server can move off a busy port.
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )

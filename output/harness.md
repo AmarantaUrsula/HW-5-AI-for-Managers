@@ -20,7 +20,7 @@ This is the reference guide for the Campus Customs agent system. It covers the *
 ## 1. How to run it
 
 ```bash
-cd hw5/backend && uvicorn main:app --reload --port 8000     # API (starts the MCP server itself)
+cd hw5/backend && uvicorn main:app --reload --port 8000     # API (starts the MCP server itself); busy? use --port 8001
 cd hw5/frontend && npm run dev                               # board at http://localhost:5173
 ```
 
@@ -169,7 +169,7 @@ Only payments for invoices and rent exist. Vendor purchases, such as restock ord
 
 ## 8. Dashboard (`frontend/`, at http://localhost:5173)
 
-The board is built with React + Vite + TypeScript. It talks to `http://localhost:8000` (set in `frontend/.env`), and the backend's CORS allows `http://localhost:5173`. The design is described in `output/design.md`:
+The board is built with React + Vite + TypeScript. It talks to `http://localhost:8000` (override with `VITE_API_BASE` in `frontend/.env`), and the backend's CORS allows the board from any `localhost` or `127.0.0.1` port. The design is described in `output/design.md`:
 - **Layout:** a status strip on top, then three columns: *choose* (tickets), *watch* (live agent feed and per-agent summary), and *decide* (approvals and cash).
 - **Agents:** Okabe–Ito colours, which are safe for colour-blind readers, plus 3-letter codes, plus indentation by delegation depth.
 - **Ticket state:** `○ open` or `✓ resolved`, shown in words and symbols, not red and green.
